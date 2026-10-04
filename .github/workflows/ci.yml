@@ -18,7 +18,9 @@ jobs:
           cache: true
 
       - name: Generate platform scaffolding
-        run: flutter create . --project-name rad_browser --org com.sahand --platforms=android,web
+        run: |
+          flutter create . --project-name rad_browser --org com.sahand --platforms=android,web
+          rm -f test/widget_test.dart
 
       - name: Install dependencies
         run: flutter pub get
@@ -27,4 +29,9 @@ jobs:
         run: flutter analyze
 
       - name: Test
-        run: flutter test
+        run: |
+          if [ -d test ] && find test -name '*_test.dart' -print -quit | grep -q .; then
+            flutter test
+          else
+            echo "No project tests yet; skipping flutter test."
+          fi
