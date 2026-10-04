@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/utils/url_utils.dart';
 import '../../../bookmarks/presentation/pages/bookmarks_page.dart';
 import '../../../browser/presentation/controllers/browser_tabs_controller.dart';
 import '../../../browser/presentation/pages/browser_page.dart';
@@ -10,16 +11,25 @@ import '../../../history/presentation/pages/history_page.dart';
 import '../../../iran_directory/presentation/pages/iran_directory_page.dart';
 import '../../../network/domain/network_mode.dart';
 import '../../../network/presentation/network_providers.dart';
+import '../../../settings/domain/app_settings.dart';
+import '../../../settings/presentation/controllers/settings_controller.dart';
+import '../../../settings/presentation/pages/settings_page.dart';
 import '../widgets/network_status_chip.dart';
 import '../widgets/rad_search_bar.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
-  void _openBrowser(BuildContext context, String input) {
-    if (input.trim().isEmpty) return;
+  void _openBrowser(BuildContext context, WidgetRef ref, String input) {
+    final value = input.trim();
+    if (value.isEmpty) return;
+
+    final target = UrlUtils.looksLikeUrl(value)
+        ? value
+        : ref.read(settingsProvider).searchEngine.searchUri(value).toString();
+
     Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => BrowserPage(initialInput: input)),
+      MaterialPageRoute<void>(builder: (_) => BrowserPage(initialInput: target)),
     );
   }
 
@@ -80,7 +90,7 @@ class HomePage extends ConsumerWidget {
                   ),
                   if (internalOnly) const SizedBox(height: 14),
                   RadSearchBar(
-                    onSubmitted: (value) => _openBrowser(context, value),
+                    onSubmitted: (value) => _openBrowser(context, ref, value),
                   ),
                   const SizedBox(height: 28),
                   Wrap(
@@ -244,6 +254,16 @@ class HomePage extends ConsumerWidget {
                   Navigator.pop(sheetContext);
                   Navigator.of(context).push(
                     MaterialPageRoute<void>(builder: (_) => const TabsPage()),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.settings_outlined),
+                title: const Text('تنظیمات'),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(builder: (_) => const SettingsPage()),
                   );
                 },
               ),
