@@ -15,6 +15,7 @@ import '../../../network/domain/network_mode.dart';
 import '../../../network/presentation/network_providers.dart';
 import '../../../offline/presentation/pages/offline_pages_page.dart';
 import '../../../search/presentation/pages/search_results_page.dart';
+import '../../../search/presentation/widgets/rad_suggesting_search_box.dart';
 import '../../../settings/domain/app_settings.dart';
 import '../../../settings/presentation/controllers/settings_controller.dart';
 import '../../../settings/presentation/pages/settings_page.dart';
@@ -176,7 +177,7 @@ class HomePage extends ConsumerWidget {
                       const SizedBox(height: 30),
                       const RadBrandLogo(size: 102),
                       const SizedBox(height: 30),
-                      _RadHomeSearchBox(
+                      RadSuggestingSearchBox(
                         hint: mode == NetworkMode.internalOnly
                             ? 'جستجو در وب ایران'
                             : mode == NetworkMode.offline
