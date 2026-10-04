@@ -239,7 +239,7 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
                     ),
                   ),
                   const SizedBox(width: 4),
-                  IconButton(
+                  IconButton.filledTonal(
                     tooltip: 'منو',
                     onPressed: () => _showBrowserMenu(context),
                     icon: const Icon(Icons.more_vert_rounded),
@@ -384,52 +384,65 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
       ),
       bottomNavigationBar: SafeArea(
         top: false,
-        child: Container(
-          decoration: BoxDecoration(
-            color: scheme.surface,
-            border: Border(
-              top: BorderSide(
-                color: scheme.outlineVariant.withValues(alpha: .5),
+        minimum: const EdgeInsets.fromLTRB(12, 4, 12, 8),
+        child: Center(
+          heightFactor: 1,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 430),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+              decoration: BoxDecoration(
+                color: scheme.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(
+                  color: scheme.outlineVariant.withValues(alpha: .5),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: .05),
+                    blurRadius: 16,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  IconButton(
+                    tooltip: 'عقب',
+                    onPressed: _canGoBack
+                        ? _goBack
+                        : () => Navigator.maybePop(context),
+                    icon: const Icon(Icons.arrow_back_rounded),
+                  ),
+                  IconButton(
+                    tooltip: 'جلو',
+                    onPressed: _canGoForward ? _goForward : null,
+                    icon: const Icon(Icons.arrow_forward_rounded),
+                  ),
+                  IconButton(
+                    tooltip: 'خانه',
+                    onPressed: () => Navigator.of(context).popUntil(
+                      (route) => route.isFirst,
+                    ),
+                    icon: const Icon(Icons.home_outlined),
+                  ),
+                  Badge(
+                    label: Text('$tabCount'),
+                    child: IconButton(
+                      tooltip: 'تب‌ها',
+                      onPressed: _openTabs,
+                      icon: const Icon(Icons.crop_square_rounded),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'منو',
+                    onPressed: () => _showBrowserMenu(context),
+                    icon: const Icon(Icons.menu_rounded),
+                  ),
+                ],
               ),
             ),
-          ),
-          padding: const EdgeInsets.fromLTRB(12, 5, 12, 7),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              IconButton(
-                tooltip: 'عقب',
-                onPressed: _canGoBack
-                    ? _goBack
-                    : () => Navigator.maybePop(context),
-                icon: const Icon(Icons.arrow_back_rounded),
-              ),
-              IconButton(
-                tooltip: 'جلو',
-                onPressed: _canGoForward ? _goForward : null,
-                icon: const Icon(Icons.arrow_forward_rounded),
-              ),
-              IconButton(
-                tooltip: 'خانه',
-                onPressed: () => Navigator.of(context).popUntil(
-                  (route) => route.isFirst,
-                ),
-                icon: const Icon(Icons.home_outlined),
-              ),
-              Badge(
-                label: Text('$tabCount'),
-                child: IconButton(
-                  tooltip: 'تب‌ها',
-                  onPressed: _openTabs,
-                  icon: const Icon(Icons.crop_square_rounded),
-                ),
-              ),
-              IconButton(
-                tooltip: 'منو',
-                onPressed: () => _showBrowserMenu(context),
-                icon: const Icon(Icons.menu_rounded),
-              ),
-            ],
           ),
         ),
       ),
@@ -442,7 +455,6 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
         ref.read(bookmarksProvider.notifier).contains(_currentUri);
     await showModalBottomSheet<void>(
       context: context,
-      showDragHandle: true,
       backgroundColor: scheme.surface,
       builder: (sheetContext) => SafeArea(
         child: Padding(
