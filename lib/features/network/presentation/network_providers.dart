@@ -12,3 +12,7 @@ final networkProbeServiceProvider = Provider<NetworkProbeService>((ref) {
 final networkModeProvider = StreamProvider<NetworkMode>((ref) {
   return ref.watch(networkProbeServiceProvider).watch();
 });
+
+final siteReachabilityProvider = FutureProvider.family<bool, Uri>((ref, uri) async {
+  return ref.watch(networkProbeServiceProvider).canReach(uri);
+});
