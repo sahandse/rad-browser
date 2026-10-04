@@ -73,6 +73,57 @@ def configure_activity() -> None:
         replace_text(activity, f"package {OLD_PACKAGE}", f"package {PACKAGE}")
 
 
+def configure_branding() -> None:
+    main_res = APP / "src" / "main" / "res"
+    drawable = main_res / "drawable"
+    drawable_v21 = main_res / "drawable-v21"
+    values = main_res / "values"
+    values_night = main_res / "values-night"
+    for directory in (drawable, drawable_v21, values, values_night):
+        directory.mkdir(parents=True, exist_ok=True)
+
+    launcher = '''<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+    <path
+        android:fillColor="#2563EB"
+        android:pathData="M128,0H384C454.7,0 512,57.3 512,128V384C512,454.7 454.7,512 384,512H128C57.3,512 0,454.7 0,384V128C0,57.3 57.3,0 128,0Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M156,118H276C364,118 412,163 412,232C412,285 384,321 332,337L418,409H332L256,343H222V409H156V118ZM222,178V286H272C319,286 343,268 343,232C343,196 319,178 272,178H222Z" />
+    <path
+        android:fillColor="#BAE6FD"
+        android:pathData="M373,117A20,20 0,1 1,372.9 117Z" />
+</vector>
+'''
+    (drawable / "rad_launcher.xml").write_text(launcher, encoding="utf-8")
+
+    splash = '''<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/rad_splash_background" />
+    <item android:gravity="center" android:drawable="@drawable/rad_launcher" />
+</layer-list>
+'''
+    (drawable / "launch_background.xml").write_text(splash, encoding="utf-8")
+    (drawable_v21 / "launch_background.xml").write_text(splash, encoding="utf-8")
+
+    colors_light = '''<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="rad_splash_background">#FFFFFF</color>
+</resources>
+'''
+    colors_dark = '''<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="rad_splash_background">#0B1020</color>
+</resources>
+'''
+    (values / "rad_colors.xml").write_text(colors_light, encoding="utf-8")
+    (values_night / "rad_colors.xml").write_text(colors_dark, encoding="utf-8")
+
+
 def configure_manifest() -> None:
     manifest_path = APP / "src" / "main" / "AndroidManifest.xml"
     if not manifest_path.exists():
@@ -117,6 +168,8 @@ def configure_manifest() -> None:
     if application is None:
         raise SystemExit("AndroidManifest.xml has no <application>")
     application.set(f"{{{ANDROID_NS}}}label", "راد")
+    application.set(f"{{{ANDROID_NS}}}icon", "@drawable/rad_launcher")
+    application.set(f"{{{ANDROID_NS}}}roundIcon", "@drawable/rad_launcher")
     # A browser must still be able to open a user-requested HTTP site when
     # HTTPS-first is disabled. HTTPS-first remains enforced in app logic.
     application.set(f"{{{ANDROID_NS}}}usesCleartextTraffic", "true")
@@ -131,6 +184,8 @@ def validate() -> None:
         raise SystemExit("Package configuration failed")
     if (ANDROID / "key.properties").exists() and 'getByName("release")' not in gradle:
         raise SystemExit("Release signing configuration failed")
+    if not (APP / "src" / "main" / "res" / "drawable" / "rad_launcher.xml").exists():
+        raise SystemExit("RAD launcher icon was not generated")
 
 
 if __name__ == "__main__":
@@ -138,6 +193,7 @@ if __name__ == "__main__":
         raise SystemExit("Run flutter create for Android before this script")
     configure_gradle()
     configure_activity()
+    configure_branding()
     configure_manifest()
     validate()
     mode = "release signing" if (ANDROID / "key.properties").exists() else "debug signing"
