@@ -16,7 +16,7 @@ class RadColors {
 class RadTheme {
   const RadTheme._();
 
-  static ThemeData light() {
+  static ThemeData light({bool compact = false}) {
     final scheme = ColorScheme.fromSeed(
       seedColor: RadColors.primary,
       brightness: Brightness.light,
@@ -27,7 +27,7 @@ class RadTheme {
       useMaterial3: true,
       colorScheme: scheme,
       scaffoldBackgroundColor: Colors.white,
-      fontFamily: 'sans',
+      visualDensity: compact ? VisualDensity.compact : VisualDensity.standard,
       appBarTheme: const AppBarTheme(
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -53,7 +53,7 @@ class RadTheme {
     );
   }
 
-  static ThemeData dark() {
+  static ThemeData dark({bool compact = false}) {
     final scheme = ColorScheme.fromSeed(
       seedColor: RadColors.primary,
       brightness: Brightness.dark,
@@ -64,7 +64,7 @@ class RadTheme {
       useMaterial3: true,
       colorScheme: scheme,
       scaffoldBackgroundColor: const Color(0xFF101114),
-      fontFamily: 'sans',
+      visualDensity: compact ? VisualDensity.compact : VisualDensity.standard,
       appBarTheme: const AppBarTheme(
         elevation: 0,
         scrolledUnderElevation: 0,
