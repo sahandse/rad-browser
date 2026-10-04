@@ -5,6 +5,7 @@ import '../../../bookmarks/presentation/controllers/bookmarks_controller.dart';
 import '../../../browser/presentation/controllers/browser_tabs_controller.dart';
 import '../../../history/presentation/controllers/history_controller.dart';
 import '../../../permissions/presentation/pages/site_permissions_page.dart';
+import '../../../privacy/presentation/pages/tracking_exceptions_page.dart';
 import '../../../sync/presentation/pages/backup_sync_page.dart';
 import '../../domain/app_settings.dart';
 import '../controllers/settings_controller.dart';
@@ -73,12 +74,21 @@ class SettingsPage extends ConsumerWidget {
                 ),
               ),
               const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.shield_moon_outlined),
+                title: const Text('استثناءهای رهگیری'),
+                subtitle: const Text('خاموش‌کردن محافظت فقط برای دامنه‌های انتخابی'),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const TrackingExceptionsPage(),
+                  ),
+                ),
+              ),
+              const Divider(height: 1),
               SwitchListTile.adaptive(
                 secondary: const Icon(Icons.https_rounded),
                 title: const Text('HTTPS-first'),
-                subtitle: const Text(
-                  'برای آدرس‌های HTTP ابتدا نسخه امن HTTPS امتحان شود.',
-                ),
+                subtitle: const Text('برای آدرس‌های HTTP ابتدا نسخه امن HTTPS امتحان شود.'),
                 value: settings.httpsFirst,
                 onChanged: (value) =>
                     ref.read(settingsProvider.notifier).setHttpsFirst(value),
@@ -87,9 +97,7 @@ class SettingsPage extends ConsumerWidget {
               SwitchListTile.adaptive(
                 secondary: const Icon(Icons.open_in_new_off_rounded),
                 title: const Text('مسدود کردن Pop-up'),
-                subtitle: const Text(
-                  'پنجره‌های ناخواسته و بازشدن خودکار تب‌ها محدود می‌شوند.',
-                ),
+                subtitle: const Text('پنجره‌های ناخواسته و بازشدن خودکار تب‌ها محدود می‌شوند.'),
                 value: settings.blockPopups,
                 onChanged: (value) =>
                     ref.read(settingsProvider.notifier).setBlockPopups(value),
@@ -98,9 +106,7 @@ class SettingsPage extends ConsumerWidget {
               SwitchListTile.adaptive(
                 secondary: const Icon(Icons.data_saver_on_rounded),
                 title: const Text('کاهش مصرف داده'),
-                subtitle: const Text(
-                  'پخش خودکار و بارگذاری‌های سنگین غیرضروری محدود می‌شوند.',
-                ),
+                subtitle: const Text('پخش خودکار و بارگذاری‌های سنگین غیرضروری محدود می‌شوند.'),
                 value: settings.dataSaver,
                 onChanged: (value) =>
                     ref.read(settingsProvider.notifier).setDataSaver(value),
@@ -125,13 +131,9 @@ class SettingsPage extends ConsumerWidget {
               ListTile(
                 leading: const Icon(Icons.sync_alt_rounded),
                 title: const Text('Android ↔ Web'),
-                subtitle: const Text(
-                  'ساخت و بازیابی فایل پشتیبان نسخه‌دار بدون وابستگی به سرور خارجی',
-                ),
+                subtitle: const Text('ساخت و بازیابی فایل پشتیبان نسخه‌دار بدون سرور خارجی'),
                 onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const BackupSyncPage(),
-                  ),
+                  MaterialPageRoute<void>(builder: (_) => const BackupSyncPage()),
                 ),
               ),
             ],
@@ -158,8 +160,7 @@ class SettingsPage extends ConsumerWidget {
                   context,
                   title: 'همه تب‌ها بسته شوند؟',
                   message: 'تمام تب‌های ذخیره‌شده بسته می‌شوند.',
-                  action: () async =>
-                      ref.read(browserTabsProvider.notifier).closeAll(),
+                  action: () async => ref.read(browserTabsProvider.notifier).closeAll(),
                 ),
               ),
               const Divider(height: 1),
