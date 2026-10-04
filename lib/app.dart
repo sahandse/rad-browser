@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/theme/rad_theme.dart';
 import 'features/home/presentation/pages/home_page.dart';
-import 'features/settings/domain/app_settings.dart';
 import 'features/settings/presentation/controllers/settings_controller.dart';
 
 class RadApp extends ConsumerWidget {
