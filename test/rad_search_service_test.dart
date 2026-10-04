@@ -30,7 +30,8 @@ void main() {
 
   test('discovers and submits an internal provider form', () async {
     final client = MockClient((request) async {
-      if (request.url.host == 'zarebin.ir' && request.url.path == '/') {
+      if (request.url.host == 'zarebin.ir' &&
+          (request.url.path.isEmpty || request.url.path == '/')) {
         return http.Response('''
           <html><body>
             <form action="/search" method="get">
