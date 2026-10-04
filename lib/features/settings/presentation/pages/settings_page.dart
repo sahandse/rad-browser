@@ -6,6 +6,7 @@ import '../../../browser/presentation/controllers/browser_tabs_controller.dart';
 import '../../../history/presentation/controllers/history_controller.dart';
 import '../../../permissions/presentation/pages/site_permissions_page.dart';
 import '../../../privacy/presentation/pages/tracking_exceptions_page.dart';
+import '../../../search/presentation/widgets/search_history_settings_tile.dart';
 import '../../../sync/presentation/pages/backup_sync_page.dart';
 import '../controllers/settings_controller.dart';
 
@@ -56,6 +57,8 @@ class SettingsPage extends ConsumerWidget {
                   settings.searchEngine,
                 ),
               ),
+              const Divider(height: 1),
+              const SearchHistorySettingsTile(),
             ],
           ),
           const SizedBox(height: 22),

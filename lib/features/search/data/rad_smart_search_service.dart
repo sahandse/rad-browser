@@ -160,6 +160,7 @@ class RadSmartSearchService {
 
   Future<List<String>> recentSearches() async {
     final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool('rad.searchHistory.enabled') == false) return const [];
     return prefs.getStringList('rad.searchHistory.v1') ?? const [];
   }
 
@@ -167,6 +168,7 @@ class RadSmartSearchService {
     final clean = query.trim();
     if (clean.isEmpty) return;
     final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool('rad.searchHistory.enabled') == false) return;
     final existing = prefs.getStringList('rad.searchHistory.v1') ?? <String>[];
     final next = <String>[clean, ...existing.where((e) => e != clean)].take(20).toList();
     await prefs.setStringList('rad.searchHistory.v1', next);
