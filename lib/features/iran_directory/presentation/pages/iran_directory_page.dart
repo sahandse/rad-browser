@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../browser/presentation/pages/browser_page.dart';
@@ -7,14 +8,30 @@ import '../../../search/presentation/search_providers.dart';
 import '../../domain/iran_site.dart';
 
 class IranDirectoryPage extends ConsumerStatefulWidget {
-  const IranDirectoryPage({super.key});
+  const IranDirectoryPage({super.key, this.initialQuery = ''});
+
+  final String initialQuery;
 
   @override
   ConsumerState<IranDirectoryPage> createState() => _IranDirectoryPageState();
 }
 
 class _IranDirectoryPageState extends ConsumerState<IranDirectoryPage> {
-  String _query = '';
+  late String _query;
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _query = widget.initialQuery;
+    _controller = TextEditingController(text: widget.initialQuery);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,16 +65,26 @@ class _IranDirectoryPageState extends ConsumerState<IranDirectoryPage> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
                   child: SearchBar(
+                    controller: _controller,
                     hintText: 'جستجو در سایت‌های ایرانی',
                     leading: const Icon(Icons.search_rounded),
+                    trailing: [
+                      if (_query.isNotEmpty)
+                        IconButton(
+                          tooltip: 'پاک کردن',
+                          onPressed: () {
+                            _controller.clear();
+                            setState(() => _query = '');
+                          },
+                          icon: const Icon(Icons.close_rounded),
+                        ),
+                    ],
                     onChanged: (value) => setState(() => _query = value),
                   ),
                 ),
                 Expanded(
                   child: filtered.isEmpty
-                      ? const Center(
-                          child: Text('نتیجه‌ای پیدا نشد'),
-                        )
+                      ? _NoLocalResult(query: _query)
                       : ListView.separated(
                           padding: const EdgeInsets.fromLTRB(12, 6, 12, 24),
                           itemCount: filtered.length,
@@ -71,6 +98,79 @@ class _IranDirectoryPageState extends ConsumerState<IranDirectoryPage> {
               ],
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+class _NoLocalResult extends StatelessWidget {
+  const _NoLocalResult({required this.query});
+
+  final String query;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 420),
+        child: Padding(
+          padding: const EdgeInsets.all(28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.travel_explore_rounded,
+                size: 44,
+                color: scheme.primary,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'در فهرست محلی نتیجه‌ای پیدا نشد',
+                textDirection: TextDirection.rtl,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'می‌توانید عبارت را با ذره‌بین جستجو کنید. دسترسی به نتیجه‌ها به وضعیت واقعی شبکه داخلی بستگی دارد.',
+                textDirection: TextDirection.rtl,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                  height: 1.6,
+                ),
+              ),
+              const SizedBox(height: 18),
+              FilledButton.icon(
+                onPressed: () async {
+                  final value = query.trim();
+                  if (value.isNotEmpty) {
+                    await Clipboard.setData(ClipboardData(text: value));
+                  }
+                  if (!context.mounted) return;
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const BrowserPage(
+                        initialInput: 'https://zarebin.ir/',
+                      ),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.search_rounded),
+                label: Text(
+                  query.trim().isEmpty
+                      ? 'باز کردن ذره‌بین'
+                      : 'کپی عبارت و باز کردن ذره‌بین',
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
