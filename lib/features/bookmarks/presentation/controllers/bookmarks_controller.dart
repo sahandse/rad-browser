@@ -60,6 +60,12 @@ class BookmarksController extends StateNotifier<List<BookmarkEntry>> {
     await _persist();
   }
 
+  Future<void> clear() async {
+    state = const [];
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_storageKey);
+  }
+
   Future<void> _persist() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList(
