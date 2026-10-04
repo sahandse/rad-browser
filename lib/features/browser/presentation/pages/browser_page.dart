@@ -279,7 +279,7 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
                   await _syncNavigationState();
                 },
                 onReceivedError: (controller, request, error) {
-                  if (!request.isForMainFrame || !mounted) return;
+                  if (request.isForMainFrame != true || !mounted) return;
                   setState(() {
                     _isLoading = false;
                     _progress = 1;
