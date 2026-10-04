@@ -1,0 +1,34 @@
+name: One-time Iran Web expansion
+
+on:
+  push:
+    paths:
+      - '.github/workflows/expand-iran-web-once.yml'
+      - 'tool/expand_iran_web.py'
+      - 'tool/patch_iran_directory_ui.py'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Expand Iran Web data
+        run: python3 tool/expand_iran_web.py
+      - name: Add Iran Web categories UI
+        run: python3 tool/patch_iran_directory_ui.py
+      - name: Commit Iran Web expansion
+        run: |
+          if git diff --quiet; then
+            echo 'No changes needed.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/data/iran_sites.json assets/data/categories.json lib/features/iran_directory/presentation/pages/iran_directory_page.dart
+          git commit -m 'feat: expand categorized Iran Web directory'
+          git push origin HEAD:main
