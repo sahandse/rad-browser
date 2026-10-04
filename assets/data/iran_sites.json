@@ -1,7 +1,17 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-04T04:36:00Z",
+  "updatedAt": "2026-10-04T05:02:00Z",
   "sites": [
+    {
+      "id": "zarebin",
+      "name": "جستجوگر ذره‌بین",
+      "url": "https://zarebin.ir/",
+      "category": "search",
+      "keywords": ["ذره بین", "ذره‌بین", "جستجو", "جستجوگر ایرانی", "موتور جستجو"],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 110
+    },
     {
       "id": "cbi",
       "name": "بانک مرکزی جمهوری اسلامی ایران",
@@ -33,16 +43,6 @@
       "priority": 88
     },
     {
-      "id": "ut",
-      "name": "دانشگاه تهران",
-      "url": "https://ut.ac.ir/",
-      "category": "education",
-      "keywords": ["دانشگاه تهران", "دانشگاه", "آموزش", "پژوهش"],
-      "verified": true,
-      "internalNetwork": false,
-      "priority": 80
-    },
-    {
       "id": "road-141",
       "name": "سامانه ۱۴۱",
       "url": "https://141.ir/",
@@ -51,6 +51,16 @@
       "verified": true,
       "internalNetwork": false,
       "priority": 85
+    },
+    {
+      "id": "ut",
+      "name": "دانشگاه تهران",
+      "url": "https://ut.ac.ir/",
+      "category": "education",
+      "keywords": ["دانشگاه تهران", "دانشگاه", "آموزش", "پژوهش"],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 80
     }
   ]
 }
