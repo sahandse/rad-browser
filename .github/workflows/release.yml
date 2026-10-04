@@ -64,15 +64,15 @@ jobs:
 
           if [ -n "$KEYSTORE_BASE64" ]; then
             echo "$KEYSTORE_BASE64" | base64 --decode > android/app/rad-release.jks
-            cat > android/key.properties <<EOF
-          storePassword=$STORE_PASSWORD
-          keyPassword=$KEY_PASSWORD
-          keyAlias=$KEY_ALIAS
-          storeFile=rad-release.jks
-          EOF
+            printf '%s\n' \
+              "storePassword=$STORE_PASSWORD" \
+              "keyPassword=$KEY_PASSWORD" \
+              "keyAlias=$KEY_ALIAS" \
+              "storeFile=rad-release.jks" \
+              > android/key.properties
           fi
 
-      - name: Configure Android package and permissions
+      - name: Configure Android package, branding and permissions
         run: python3 tool/configure_android.py
 
       - name: Install dependencies
@@ -99,6 +99,12 @@ jobs:
             echo 'Forbidden Android permission found in merged release manifest.'
             exit 1
           fi
+
+      - name: Verify production signing before publish
+        if: ${{ inputs.publish }}
+        run: |
+          test -f android/key.properties
+          jarsigner -verify -certs build/app/outputs/bundle/release/app-release.aab >/dev/null
 
       - name: Build Web release
         run: |
