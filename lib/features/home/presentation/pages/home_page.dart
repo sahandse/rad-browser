@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../browser/presentation/pages/browser_page.dart';
 import '../../../network/domain/network_mode.dart';
 import '../widgets/network_status_chip.dart';
 import '../widgets/rad_search_bar.dart';
@@ -15,6 +16,15 @@ class HomePage extends StatelessWidget {
     (icon: Icons.shopping_bag_rounded, label: 'خرید'),
     (icon: Icons.school_rounded, label: 'آموزش'),
   ];
+
+  void _openBrowser(BuildContext context, String input) {
+    if (input.trim().isEmpty) return;
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => BrowserPage(initialInput: input),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +54,7 @@ class HomePage extends StatelessWidget {
                   const SizedBox(height: 54),
                   _RadMark(theme: theme),
                   const SizedBox(height: 30),
-                  RadSearchBar(onSubmitted: (_) {}),
+                  RadSearchBar(onSubmitted: (value) => _openBrowser(context, value)),
                   const SizedBox(height: 28),
                   Wrap(
                     alignment: WrapAlignment.center,
