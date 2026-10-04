@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import '../../../../core/utils/url_utils.dart';
 
@@ -14,12 +15,17 @@ class BrowserPage extends StatefulWidget {
 class _BrowserPageState extends State<BrowserPage> {
   late final TextEditingController _addressController;
   late Uri _currentUri;
+  InAppWebViewController? _webViewController;
+  double _progress = 0;
+  bool _canGoBack = false;
+  bool _canGoForward = false;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _currentUri = UrlUtils.resolve(widget.initialInput);
-    _addressController = TextEditingController(text: _currentUri.toString());
+    _addressController = TextEditingController(text: _displayAddress(_currentUri));
   }
 
   @override
@@ -28,116 +34,289 @@ class _BrowserPageState extends State<BrowserPage> {
     super.dispose();
   }
 
-  void _navigate(String value) {
-    if (value.trim().isEmpty) return;
+  String _displayAddress(Uri uri) {
+    if (uri.host.isEmpty) return uri.toString();
+    return uri.toString();
+  }
+
+  Future<void> _syncNavigationState() async {
+    final controller = _webViewController;
+    if (controller == null) return;
+    final back = await controller.canGoBack();
+    final forward = await controller.canGoForward();
+    if (!mounted) return;
     setState(() {
-      _currentUri = UrlUtils.resolve(value);
-      _addressController.text = _currentUri.toString();
+      _canGoBack = back;
+      _canGoForward = forward;
     });
+  }
+
+  Future<void> _navigate(String value) async {
+    if (value.trim().isEmpty) return;
+    final uri = UrlUtils.resolve(value);
+    FocusManager.instance.primaryFocus?.unfocus();
+    setState(() {
+      _currentUri = uri;
+      _addressController.text = _displayAddress(uri);
+      _isLoading = true;
+    });
+    await _webViewController?.loadUrl(urlRequest: URLRequest(url: WebUri(uri.toString())));
+  }
+
+  Future<void> _goBack() async {
+    final controller = _webViewController;
+    if (controller != null && await controller.canGoBack()) {
+      await controller.goBack();
+    } else if (mounted) {
+      Navigator.maybePop(context);
+    }
+  }
+
+  Future<void> _goForward() async {
+    final controller = _webViewController;
+    if (controller != null && await controller.canGoForward()) {
+      await controller.goForward();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final isIr = UrlUtils.isIrDomain(_currentUri);
+    final isSecure = _currentUri.scheme == 'https';
 
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        titleSpacing: 12,
-        title: Container(
-          height: 46,
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: .6),
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: TextField(
-            controller: _addressController,
-            textInputAction: TextInputAction.go,
-            onSubmitted: _navigate,
-            keyboardType: TextInputType.url,
-            decoration: InputDecoration(
-              isDense: true,
-              fillColor: Colors.transparent,
-              prefixIcon: Icon(
-                isIr ? Icons.flag_rounded : Icons.lock_outline_rounded,
-                size: 18,
+      backgroundColor: scheme.surface,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: scheme.surfaceContainerHighest.withValues(alpha: .72),
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(color: scheme.outlineVariant.withValues(alpha: .45)),
+                      ),
+                      child: TextField(
+                        controller: _addressController,
+                        textInputAction: TextInputAction.go,
+                        keyboardType: TextInputType.url,
+                        autocorrect: false,
+                        enableSuggestions: false,
+                        onSubmitted: _navigate,
+                        onTap: () => _addressController.selection = TextSelection(
+                          baseOffset: 0,
+                          extentOffset: _addressController.text.length,
+                        ),
+                        decoration: InputDecoration(
+                          isDense: true,
+                          filled: false,
+                          prefixIcon: Tooltip(
+                            message: isIr
+                                ? 'دامنه ایران'
+                                : isSecure
+                                    ? 'اتصال امن'
+                                    : 'اطلاعات سایت',
+                            child: Icon(
+                              isIr
+                                  ? Icons.public_rounded
+                                  : isSecure
+                                      ? Icons.lock_rounded
+                                      : Icons.info_outline_rounded,
+                              size: 18,
+                              color: isIr ? scheme.primary : scheme.onSurfaceVariant,
+                            ),
+                          ),
+                          suffixIcon: IconButton(
+                            tooltip: _isLoading ? 'توقف' : 'تازه‌سازی',
+                            onPressed: () async {
+                              if (_isLoading) {
+                                await _webViewController?.stopLoading();
+                              } else {
+                                await _webViewController?.reload();
+                              }
+                            },
+                            icon: Icon(
+                              _isLoading ? Icons.close_rounded : Icons.refresh_rounded,
+                              size: 20,
+                            ),
+                          ),
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  IconButton(
+                    tooltip: 'منو',
+                    onPressed: () => _showBrowserMenu(context),
+                    icon: const Icon(Icons.more_vert_rounded),
+                  ),
+                ],
               ),
-              suffixIcon: IconButton(
-                tooltip: 'تازه‌سازی',
-                onPressed: () => setState(() {}),
-                icon: const Icon(Icons.refresh_rounded, size: 20),
-              ),
-              border: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(vertical: 13),
             ),
-            style: theme.textTheme.bodyMedium,
-          ),
-        ),
-        actions: [
-          IconButton(
-            tooltip: 'منو',
-            onPressed: () {},
-            icon: const Icon(Icons.more_vert_rounded),
-          ),
-        ],
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.language_rounded, size: 46, color: theme.colorScheme.primary),
-              const SizedBox(height: 14),
-              Text(
-                'Browser Engine',
-                style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              height: _progress >= 1 ? 0 : 2,
+              alignment: Alignment.centerLeft,
+              child: LinearProgressIndicator(value: _progress == 0 ? null : _progress),
+            ),
+            Expanded(
+              child: InAppWebView(
+                initialUrlRequest: URLRequest(url: WebUri(_currentUri.toString())),
+                initialSettings: InAppWebViewSettings(
+                  javaScriptEnabled: true,
+                  transparentBackground: false,
+                  supportZoom: true,
+                  builtInZoomControls: false,
+                  displayZoomControls: false,
+                  useShouldOverrideUrlLoading: true,
+                  mediaPlaybackRequiresUserGesture: true,
+                  allowsBackForwardNavigationGestures: true,
+                ),
+                onWebViewCreated: (controller) {
+                  _webViewController = controller;
+                },
+                shouldOverrideUrlLoading: (controller, action) async {
+                  final url = action.request.url;
+                  if (url == null) return NavigationActionPolicy.ALLOW;
+                  return NavigationActionPolicy.ALLOW;
+                },
+                onLoadStart: (controller, url) {
+                  if (url == null) return;
+                  final uri = Uri.tryParse(url.toString());
+                  if (uri == null || !mounted) return;
+                  setState(() {
+                    _currentUri = uri;
+                    _addressController.text = _displayAddress(uri);
+                    _isLoading = true;
+                  });
+                  _syncNavigationState();
+                },
+                onProgressChanged: (controller, progress) {
+                  if (!mounted) return;
+                  setState(() => _progress = progress / 100);
+                },
+                onLoadStop: (controller, url) async {
+                  if (!mounted) return;
+                  if (url != null) {
+                    final uri = Uri.tryParse(url.toString());
+                    if (uri != null) {
+                      _currentUri = uri;
+                      _addressController.text = _displayAddress(uri);
+                    }
+                  }
+                  setState(() {
+                    _isLoading = false;
+                    _progress = 1;
+                  });
+                  await _syncNavigationState();
+                },
+                onReceivedError: (controller, request, error) {
+                  if (!request.isForMainFrame || !mounted) return;
+                  setState(() {
+                    _isLoading = false;
+                    _progress = 1;
+                  });
+                },
               ),
-              const SizedBox(height: 8),
-              Text(
-                _currentUri.toString(),
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Container(
+          decoration: BoxDecoration(
+            color: scheme.surface,
+            border: Border(top: BorderSide(color: scheme.outlineVariant.withValues(alpha: .5))),
+          ),
+          padding: const EdgeInsets.fromLTRB(12, 5, 12, 7),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              IconButton(
+                tooltip: 'عقب',
+                onPressed: _canGoBack ? _goBack : () => Navigator.maybePop(context),
+                icon: const Icon(Icons.arrow_back_rounded),
+              ),
+              IconButton(
+                tooltip: 'جلو',
+                onPressed: _canGoForward ? _goForward : null,
+                icon: const Icon(Icons.arrow_forward_rounded),
+              ),
+              IconButton(
+                tooltip: 'خانه',
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.home_outlined),
+              ),
+              Badge(
+                label: const Text('1'),
+                child: IconButton(
+                  tooltip: 'تب‌ها',
+                  onPressed: () {},
+                  icon: const Icon(Icons.crop_square_rounded),
                 ),
               ),
-              const SizedBox(height: 12),
-              Text(
-                isIr ? 'دامنه داخلی شناسایی شد' : 'آماده اتصال به WebView',
-                textDirection: TextDirection.rtl,
-                style: theme.textTheme.labelLarge,
+              IconButton(
+                tooltip: 'منو',
+                onPressed: () => _showBrowserMenu(context),
+                icon: const Icon(Icons.menu_rounded),
               ),
             ],
           ),
         ),
       ),
-      bottomNavigationBar: SafeArea(
-        top: false,
+    );
+  }
+
+  Future<void> _showBrowserMenu(BuildContext context) async {
+    final scheme = Theme.of(context).colorScheme;
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      backgroundColor: scheme.surface,
+      builder: (context) => SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(14, 6, 14, 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              IconButton(
-                onPressed: () => Navigator.maybePop(context),
-                icon: const Icon(Icons.arrow_back_rounded),
+              ListTile(
+                leading: const Icon(Icons.add_box_outlined),
+                title: const Text('تب جدید'),
+                onTap: () => Navigator.pop(context),
               ),
-              IconButton(onPressed: () {}, icon: const Icon(Icons.arrow_forward_rounded)),
-              IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.home_rounded),
+              ListTile(
+                leading: const Icon(Icons.star_border_rounded),
+                title: const Text('افزودن به نشانک‌ها'),
+                onTap: () => Navigator.pop(context),
               ),
-              Badge(
-                label: const Text('1'),
-                child: IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.crop_square_rounded),
-                ),
+              ListTile(
+                leading: const Icon(Icons.share_outlined),
+                title: const Text('اشتراک‌گذاری'),
+                onTap: () => Navigator.pop(context),
               ),
-              IconButton(onPressed: () {}, icon: const Icon(Icons.menu_rounded)),
+              ListTile(
+                leading: const Icon(Icons.history_rounded),
+                title: const Text('تاریخچه'),
+                onTap: () => Navigator.pop(context),
+              ),
+              ListTile(
+                leading: const Icon(Icons.settings_outlined),
+                title: const Text('تنظیمات'),
+                onTap: () => Navigator.pop(context),
+              ),
             ],
           ),
         ),
