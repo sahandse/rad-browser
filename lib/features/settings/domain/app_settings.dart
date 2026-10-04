@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 enum RadThemePreference { system, light, dark }
-enum RadSearchEngine { google, bing, duckDuckGo }
+enum RadSearchEngine { google, zarebin, bing, duckDuckGo }
 enum RadUiDensity { comfortable, compact }
 enum RadTrackingProtection { off, standard, strict }
 
@@ -54,13 +54,15 @@ class AppSettings {
 extension RadSearchEngineInfo on RadSearchEngine {
   String get title => switch (this) {
         RadSearchEngine.google => 'Google',
+        RadSearchEngine.zarebin => 'ذره‌بین',
         RadSearchEngine.bing => 'Bing',
         RadSearchEngine.duckDuckGo => 'DuckDuckGo',
       };
 
   Uri searchUri(String query) => switch (this) {
         RadSearchEngine.google =>
-          Uri.https('www.google.com', '/search', {'q': query}),
+          Uri.https('www.google.com', '/search', {'q': query, 'hl': 'fa'}),
+        RadSearchEngine.zarebin => Uri.https('zarebin.ir', '/'),
         RadSearchEngine.bing =>
           Uri.https('www.bing.com', '/search', {'q': query}),
         RadSearchEngine.duckDuckGo =>
