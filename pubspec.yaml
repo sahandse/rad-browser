@@ -1,7 +1,7 @@
 name: rad_browser
-description: RAD Browser - a minimal Flutter browser for Android and Web.
+description: RAD Browser - a minimal privacy-focused Flutter browser for Android and Web.
 publish_to: 'none'
-version: 0.1.0+1
+version: 1.0.0+1
 
 environment:
   sdk: '>=3.10.0 <4.0.0'
@@ -19,6 +19,7 @@ dependencies:
   file_saver: ^0.4.0
   file_picker: ^13.1.0
   share_plus: ^13.3.1
+  permission_handler: ^12.0.3
 
 dev_dependencies:
   flutter_test:
