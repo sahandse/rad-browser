@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/url_utils.dart';
 import '../../../privacy/domain/tracker_blocker.dart';
-import '../../../settings/domain/app_settings.dart';
 import '../../../settings/presentation/controllers/settings_controller.dart';
 
 class PrivateBrowserPage extends ConsumerStatefulWidget {
@@ -68,6 +67,29 @@ class _PrivateBrowserPageState extends ConsumerState<PrivateBrowserPage> {
       _canGoBack = back;
       _canGoForward = forward;
     });
+  }
+
+  Future<void> _applyDataSaver() async {
+    if (!ref.read(settingsProvider).dataSaver) return;
+    await _controller?.evaluateJavascript(
+      source: '''
+        (() => {
+          const media = document.querySelectorAll('video, audio');
+          media.forEach((node) => {
+            try {
+              node.autoplay = false;
+              node.preload = 'none';
+              node.removeAttribute('autoplay');
+              node.pause();
+            } catch (_) {}
+          });
+          const sources = document.querySelectorAll('source[media]');
+          sources.forEach((node) => {
+            try { node.setAttribute('data-rad-deferred', '1'); } catch (_) {}
+          });
+        })();
+      ''',
+    );
   }
 
   @override
@@ -206,6 +228,7 @@ class _PrivateBrowserPageState extends ConsumerState<PrivateBrowserPage> {
                     _loading = false;
                     _progress = 1;
                   });
+                  await _applyDataSaver();
                   await _syncNavigation();
                 },
               ),
