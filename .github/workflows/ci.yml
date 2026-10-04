@@ -17,9 +17,14 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Generate platform scaffolding
+      - name: Generate missing platform scaffolding
         run: |
-          flutter create . --project-name rad_browser --org com.sahand --platforms=android,web
+          if [ ! -d android ]; then
+            flutter create . --project-name rad_browser --org com.sahand --platforms=android
+          fi
+          if [ ! -f web/index.html ]; then
+            flutter create . --project-name rad_browser --org com.sahand --platforms=web
+          fi
           rm -f test/widget_test.dart
 
       - name: Install dependencies
