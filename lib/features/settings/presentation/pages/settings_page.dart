@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../bookmarks/presentation/controllers/bookmarks_controller.dart';
 import '../../../browser/presentation/controllers/browser_tabs_controller.dart';
 import '../../../history/presentation/controllers/history_controller.dart';
+import '../../../permissions/presentation/pages/site_permissions_page.dart';
+import '../../../sync/presentation/pages/backup_sync_page.dart';
 import '../../domain/app_settings.dart';
 import '../controllers/settings_controller.dart';
 
@@ -74,7 +76,9 @@ class SettingsPage extends ConsumerWidget {
               SwitchListTile.adaptive(
                 secondary: const Icon(Icons.https_rounded),
                 title: const Text('HTTPS-first'),
-                subtitle: const Text('برای آدرس‌های HTTP ابتدا نسخه امن HTTPS امتحان شود.'),
+                subtitle: const Text(
+                  'برای آدرس‌های HTTP ابتدا نسخه امن HTTPS امتحان شود.',
+                ),
                 value: settings.httpsFirst,
                 onChanged: (value) =>
                     ref.read(settingsProvider.notifier).setHttpsFirst(value),
@@ -83,7 +87,9 @@ class SettingsPage extends ConsumerWidget {
               SwitchListTile.adaptive(
                 secondary: const Icon(Icons.open_in_new_off_rounded),
                 title: const Text('مسدود کردن Pop-up'),
-                subtitle: const Text('پنجره‌های ناخواسته و بازشدن خودکار تب‌ها محدود می‌شوند.'),
+                subtitle: const Text(
+                  'پنجره‌های ناخواسته و بازشدن خودکار تب‌ها محدود می‌شوند.',
+                ),
                 value: settings.blockPopups,
                 onChanged: (value) =>
                     ref.read(settingsProvider.notifier).setBlockPopups(value),
@@ -92,10 +98,41 @@ class SettingsPage extends ConsumerWidget {
               SwitchListTile.adaptive(
                 secondary: const Icon(Icons.data_saver_on_rounded),
                 title: const Text('کاهش مصرف داده'),
-                subtitle: const Text('پخش خودکار و بارگذاری‌های سنگین غیرضروری محدود می‌شوند.'),
+                subtitle: const Text(
+                  'پخش خودکار و بارگذاری‌های سنگین غیرضروری محدود می‌شوند.',
+                ),
                 value: settings.dataSaver,
                 onChanged: (value) =>
                     ref.read(settingsProvider.notifier).setDataSaver(value),
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.admin_panel_settings_outlined),
+                title: const Text('مجوزهای سایت‌ها'),
+                subtitle: const Text('دوربین، میکروفون، موقعیت و اعلان‌ها'),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const SitePermissionsPage(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 22),
+          _SectionTitle(title: 'انتقال و پشتیبان', theme: theme),
+          _SettingCard(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.sync_alt_rounded),
+                title: const Text('Android ↔ Web'),
+                subtitle: const Text(
+                  'ساخت و بازیابی فایل پشتیبان نسخه‌دار بدون وابستگی به سرور خارجی',
+                ),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const BackupSyncPage(),
+                  ),
+                ),
               ),
             ],
           ),
