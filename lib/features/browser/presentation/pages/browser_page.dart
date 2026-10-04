@@ -1,20 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/url_utils.dart';
+import '../controllers/browser_tabs_controller.dart';
+import 'tabs_page.dart';
 
-class BrowserPage extends StatefulWidget {
-  const BrowserPage({super.key, required this.initialInput});
+class BrowserPage extends ConsumerStatefulWidget {
+  const BrowserPage({
+    super.key,
+    required this.initialInput,
+    this.existingTabId,
+  });
 
   final String initialInput;
+  final String? existingTabId;
 
   @override
-  State<BrowserPage> createState() => _BrowserPageState();
+  ConsumerState<BrowserPage> createState() => _BrowserPageState();
 }
 
-class _BrowserPageState extends State<BrowserPage> {
+class _BrowserPageState extends ConsumerState<BrowserPage> {
   late final TextEditingController _addressController;
   late Uri _currentUri;
+  late final String _tabId;
   InAppWebViewController? _webViewController;
   double _progress = 0;
   bool _canGoBack = false;
@@ -25,18 +34,15 @@ class _BrowserPageState extends State<BrowserPage> {
   void initState() {
     super.initState();
     _currentUri = UrlUtils.resolve(widget.initialInput);
-    _addressController = TextEditingController(text: _displayAddress(_currentUri));
+    _addressController = TextEditingController(text: _currentUri.toString());
+    _tabId = widget.existingTabId ??
+        ref.read(browserTabsProvider.notifier).open(_currentUri);
   }
 
   @override
   void dispose() {
     _addressController.dispose();
     super.dispose();
-  }
-
-  String _displayAddress(Uri uri) {
-    if (uri.host.isEmpty) return uri.toString();
-    return uri.toString();
   }
 
   Future<void> _syncNavigationState() async {
@@ -57,19 +63,27 @@ class _BrowserPageState extends State<BrowserPage> {
     FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
       _currentUri = uri;
-      _addressController.text = _displayAddress(uri);
+      _addressController.text = uri.toString();
       _isLoading = true;
     });
-    await _webViewController?.loadUrl(urlRequest: URLRequest(url: WebUri(uri.toString())));
+    ref.read(browserTabsProvider.notifier).update(
+          _tabId,
+          url: uri,
+          isLoading: true,
+          progress: 0,
+        );
+    await _webViewController?.loadUrl(
+      urlRequest: URLRequest(url: WebUri(uri.toString())),
+    );
   }
 
   Future<void> _goBack() async {
     final controller = _webViewController;
     if (controller != null && await controller.canGoBack()) {
       await controller.goBack();
-    } else if (mounted) {
-      Navigator.maybePop(context);
+      return;
     }
+    if (mounted) Navigator.maybePop(context);
   }
 
   Future<void> _goForward() async {
@@ -79,12 +93,19 @@ class _BrowserPageState extends State<BrowserPage> {
     }
   }
 
+  void _openTabs() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (_) => const TabsPage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final isIr = UrlUtils.isIrDomain(_currentUri);
     final isSecure = _currentUri.scheme == 'https';
+    final tabCount = ref.watch(browserTabsProvider).length;
 
     return Scaffold(
       backgroundColor: scheme.surface,
@@ -101,7 +122,9 @@ class _BrowserPageState extends State<BrowserPage> {
                       decoration: BoxDecoration(
                         color: scheme.surfaceContainerHighest.withValues(alpha: .72),
                         borderRadius: BorderRadius.circular(24),
-                        border: Border.all(color: scheme.outlineVariant.withValues(alpha: .45)),
+                        border: Border.all(
+                          color: scheme.outlineVariant.withValues(alpha: .45),
+                        ),
                       ),
                       child: TextField(
                         controller: _addressController,
@@ -110,10 +133,12 @@ class _BrowserPageState extends State<BrowserPage> {
                         autocorrect: false,
                         enableSuggestions: false,
                         onSubmitted: _navigate,
-                        onTap: () => _addressController.selection = TextSelection(
-                          baseOffset: 0,
-                          extentOffset: _addressController.text.length,
-                        ),
+                        onTap: () {
+                          _addressController.selection = TextSelection(
+                            baseOffset: 0,
+                            extentOffset: _addressController.text.length,
+                          );
+                        },
                         decoration: InputDecoration(
                           isDense: true,
                           filled: false,
@@ -130,7 +155,9 @@ class _BrowserPageState extends State<BrowserPage> {
                                       ? Icons.lock_rounded
                                       : Icons.info_outline_rounded,
                               size: 18,
-                              color: isIr ? scheme.primary : scheme.onSurfaceVariant,
+                              color: isIr
+                                  ? scheme.primary
+                                  : scheme.onSurfaceVariant,
                             ),
                           ),
                           suffixIcon: IconButton(
@@ -143,16 +170,21 @@ class _BrowserPageState extends State<BrowserPage> {
                               }
                             },
                             icon: Icon(
-                              _isLoading ? Icons.close_rounded : Icons.refresh_rounded,
+                              _isLoading
+                                  ? Icons.close_rounded
+                                  : Icons.refresh_rounded,
                               size: 20,
                             ),
                           ),
                           border: InputBorder.none,
                           enabledBorder: InputBorder.none,
                           focusedBorder: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                          contentPadding:
+                              const EdgeInsets.symmetric(vertical: 14),
                         ),
-                        style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ),
@@ -169,11 +201,15 @@ class _BrowserPageState extends State<BrowserPage> {
               duration: const Duration(milliseconds: 180),
               height: _progress >= 1 ? 0 : 2,
               alignment: Alignment.centerLeft,
-              child: LinearProgressIndicator(value: _progress == 0 ? null : _progress),
+              child: LinearProgressIndicator(
+                value: _progress == 0 ? null : _progress,
+              ),
             ),
             Expanded(
               child: InAppWebView(
-                initialUrlRequest: URLRequest(url: WebUri(_currentUri.toString())),
+                initialUrlRequest: URLRequest(
+                  url: WebUri(_currentUri.toString()),
+                ),
                 initialSettings: InAppWebViewSettings(
                   javaScriptEnabled: true,
                   transparentBackground: false,
@@ -188,8 +224,6 @@ class _BrowserPageState extends State<BrowserPage> {
                   _webViewController = controller;
                 },
                 shouldOverrideUrlLoading: (controller, action) async {
-                  final url = action.request.url;
-                  if (url == null) return NavigationActionPolicy.ALLOW;
                   return NavigationActionPolicy.ALLOW;
                 },
                 onLoadStart: (controller, url) {
@@ -198,28 +232,50 @@ class _BrowserPageState extends State<BrowserPage> {
                   if (uri == null || !mounted) return;
                   setState(() {
                     _currentUri = uri;
-                    _addressController.text = _displayAddress(uri);
+                    _addressController.text = uri.toString();
                     _isLoading = true;
                   });
+                  ref.read(browserTabsProvider.notifier).update(
+                        _tabId,
+                        url: uri,
+                        isLoading: true,
+                      );
                   _syncNavigationState();
                 },
                 onProgressChanged: (controller, progress) {
                   if (!mounted) return;
-                  setState(() => _progress = progress / 100);
+                  final value = progress / 100;
+                  setState(() => _progress = value);
+                  ref.read(browserTabsProvider.notifier).update(
+                        _tabId,
+                        progress: value,
+                      );
+                },
+                onTitleChanged: (controller, title) {
+                  if (title == null || title.trim().isEmpty) return;
+                  ref.read(browserTabsProvider.notifier).update(
+                        _tabId,
+                        title: title.trim(),
+                      );
                 },
                 onLoadStop: (controller, url) async {
                   if (!mounted) return;
-                  if (url != null) {
-                    final uri = Uri.tryParse(url.toString());
-                    if (uri != null) {
-                      _currentUri = uri;
-                      _addressController.text = _displayAddress(uri);
-                    }
+                  Uri? uri;
+                  if (url != null) uri = Uri.tryParse(url.toString());
+                  if (uri != null) {
+                    _currentUri = uri;
+                    _addressController.text = uri.toString();
                   }
                   setState(() {
                     _isLoading = false;
                     _progress = 1;
                   });
+                  ref.read(browserTabsProvider.notifier).update(
+                        _tabId,
+                        url: uri,
+                        isLoading: false,
+                        progress: 1,
+                      );
                   await _syncNavigationState();
                 },
                 onReceivedError: (controller, request, error) {
@@ -228,6 +284,11 @@ class _BrowserPageState extends State<BrowserPage> {
                     _isLoading = false;
                     _progress = 1;
                   });
+                  ref.read(browserTabsProvider.notifier).update(
+                        _tabId,
+                        isLoading: false,
+                        progress: 1,
+                      );
                 },
               ),
             ),
@@ -239,7 +300,11 @@ class _BrowserPageState extends State<BrowserPage> {
         child: Container(
           decoration: BoxDecoration(
             color: scheme.surface,
-            border: Border(top: BorderSide(color: scheme.outlineVariant.withValues(alpha: .5))),
+            border: Border(
+              top: BorderSide(
+                color: scheme.outlineVariant.withValues(alpha: .5),
+              ),
+            ),
           ),
           padding: const EdgeInsets.fromLTRB(12, 5, 12, 7),
           child: Row(
@@ -247,7 +312,9 @@ class _BrowserPageState extends State<BrowserPage> {
             children: [
               IconButton(
                 tooltip: 'عقب',
-                onPressed: _canGoBack ? _goBack : () => Navigator.maybePop(context),
+                onPressed: _canGoBack
+                    ? _goBack
+                    : () => Navigator.maybePop(context),
                 icon: const Icon(Icons.arrow_back_rounded),
               ),
               IconButton(
@@ -257,14 +324,16 @@ class _BrowserPageState extends State<BrowserPage> {
               ),
               IconButton(
                 tooltip: 'خانه',
-                onPressed: () => Navigator.pop(context),
+                onPressed: () => Navigator.of(context).popUntil(
+                  (route) => route.isFirst,
+                ),
                 icon: const Icon(Icons.home_outlined),
               ),
               Badge(
-                label: const Text('1'),
+                label: Text('$tabCount'),
                 child: IconButton(
                   tooltip: 'تب‌ها',
-                  onPressed: () {},
+                  onPressed: _openTabs,
                   icon: const Icon(Icons.crop_square_rounded),
                 ),
               ),
@@ -286,7 +355,7 @@ class _BrowserPageState extends State<BrowserPage> {
       context: context,
       showDragHandle: true,
       backgroundColor: scheme.surface,
-      builder: (context) => SafeArea(
+      builder: (sheetContext) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
           child: Column(
@@ -295,27 +364,27 @@ class _BrowserPageState extends State<BrowserPage> {
               ListTile(
                 leading: const Icon(Icons.add_box_outlined),
                 title: const Text('تب جدید'),
-                onTap: () => Navigator.pop(context),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                },
               ),
               ListTile(
-                leading: const Icon(Icons.star_border_rounded),
-                title: const Text('افزودن به نشانک‌ها'),
-                onTap: () => Navigator.pop(context),
+                leading: const Icon(Icons.refresh_rounded),
+                title: const Text('تازه‌سازی'),
+                onTap: () async {
+                  Navigator.pop(sheetContext);
+                  await _webViewController?.reload();
+                },
               ),
               ListTile(
-                leading: const Icon(Icons.share_outlined),
-                title: const Text('اشتراک‌گذاری'),
-                onTap: () => Navigator.pop(context),
-              ),
-              ListTile(
-                leading: const Icon(Icons.history_rounded),
-                title: const Text('تاریخچه'),
-                onTap: () => Navigator.pop(context),
-              ),
-              ListTile(
-                leading: const Icon(Icons.settings_outlined),
-                title: const Text('تنظیمات'),
-                onTap: () => Navigator.pop(context),
+                leading: const Icon(Icons.close_rounded),
+                title: const Text('بستن این تب'),
+                onTap: () {
+                  ref.read(browserTabsProvider.notifier).close(_tabId);
+                  Navigator.pop(sheetContext);
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                },
               ),
             ],
           ),
