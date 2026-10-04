@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:html/dom.dart';
 import 'package:html/parser.dart' as html_parser;
@@ -18,6 +19,32 @@ class RadSearchItem {
   final String snippet;
 
   String get host => Uri.tryParse(url)?.host.replaceFirst('www.', '') ?? url;
+
+  String get faviconUrl {
+    final uri = Uri.tryParse(url);
+    if (uri == null || uri.host.isEmpty) return '';
+    return Uri.https('www.google.com', '/s2/favicons', {
+      'domain': uri.host,
+      'sz': '64',
+    }).toString();
+  }
+}
+
+class RadMediaItem {
+  const RadMediaItem({
+    required this.title,
+    required this.sourceUrl,
+    required this.thumbnailUrl,
+    this.mediaUrl,
+  });
+
+  final String title;
+  final String sourceUrl;
+  final String thumbnailUrl;
+  final String? mediaUrl;
+
+  String get host =>
+      Uri.tryParse(sourceUrl)?.host.replaceFirst('www.', '') ?? sourceUrl;
 }
 
 class RadSearchResponse {
@@ -106,6 +133,42 @@ class RadSearchService {
     );
   }
 
+  Future<List<RadMediaItem>> searchImages(String query) async {
+    final clean = query.trim();
+    if (clean.isEmpty) return const [];
+    try {
+      return await _bingImages(clean).timeout(const Duration(seconds: 12));
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  Future<List<RadMediaItem>> searchVideos(String query) async {
+    final clean = query.trim();
+    if (clean.isEmpty) return const [];
+    try {
+      final direct = await _bingVideos(clean).timeout(const Duration(seconds: 12));
+      if (direct.isNotEmpty) return direct;
+    } catch (_) {}
+
+    try {
+      final web = await _bing('$clean ویدیو').timeout(const Duration(seconds: 10));
+      return web
+          .where((item) => _looksLikeVideoHost(item.host))
+          .map(
+            (item) => RadMediaItem(
+              title: item.title,
+              sourceUrl: item.url,
+              thumbnailUrl: '',
+            ),
+          )
+          .take(12)
+          .toList(growable: false);
+    } catch (_) {
+      return const [];
+    }
+  }
+
   Future<List<RadSearchItem>> _searchWith(
     RadSearchEngine engine,
     String query,
@@ -122,7 +185,7 @@ class RadSearchService {
     final uri = Uri.https('www.google.com', '/search', {
       'q': query,
       'hl': 'fa',
-      'num': '20',
+      'num': '30',
       'filter': '0',
     });
     final response = await _client.get(uri, headers: _headers);
@@ -141,13 +204,17 @@ class RadSearchService {
       final snippet = _snippet(container, title);
       seen.add(url);
       results.add(RadSearchItem(title: title, url: url, snippet: snippet));
-      if (results.length >= 20) break;
+      if (results.length >= 30) break;
     }
     return results;
   }
 
   Future<List<RadSearchItem>> _bing(String query) async {
-    final uri = Uri.https('www.bing.com', '/search', {'q': query, 'setlang': 'fa'});
+    final uri = Uri.https('www.bing.com', '/search', {
+      'q': query,
+      'setlang': 'fa',
+      'count': '30',
+    });
     final response = await _client.get(uri, headers: _headers);
     if (response.statusCode < 200 || response.statusCode >= 400) return const [];
     final doc = html_parser.parse(response.body);
@@ -163,7 +230,7 @@ class RadSearchService {
       final snippet = _clean(node.querySelector('.b_caption p, p')?.text ?? '');
       seen.add(url);
       results.add(RadSearchItem(title: title, url: url, snippet: snippet));
-      if (results.length >= 20) break;
+      if (results.length >= 30) break;
     }
     return results;
   }
@@ -185,16 +252,96 @@ class RadSearchService {
       final snippet = _clean(node.querySelector('.result__snippet')?.text ?? '');
       seen.add(url);
       results.add(RadSearchItem(title: title, url: url, snippet: snippet));
-      if (results.length >= 20) break;
+      if (results.length >= 30) break;
+    }
+    return results;
+  }
+
+  Future<List<RadMediaItem>> _bingImages(String query) async {
+    final uri = Uri.https('www.bing.com', '/images/search', {
+      'q': query,
+      'form': 'HDRSC3',
+      'first': '1',
+    });
+    final response = await _client.get(uri, headers: _headers);
+    if (response.statusCode < 200 || response.statusCode >= 400) return const [];
+    final doc = html_parser.parse(response.body);
+    final results = <RadMediaItem>[];
+    final seen = <String>{};
+
+    for (final anchor in doc.querySelectorAll('a.iusc')) {
+      final raw = anchor.attributes['m'];
+      if (raw == null || raw.isEmpty) continue;
+      try {
+        final meta = jsonDecode(raw) as Map<String, dynamic>;
+        final image = meta['murl']?.toString().trim() ?? '';
+        final source = meta['purl']?.toString().trim() ?? '';
+        final title = _clean(meta['t']?.toString() ?? anchor.attributes['aria-label'] ?? '');
+        if (image.isEmpty || source.isEmpty || seen.contains(image)) continue;
+        if (Uri.tryParse(image)?.hasScheme != true || Uri.tryParse(source)?.hasScheme != true) {
+          continue;
+        }
+        seen.add(image);
+        results.add(
+          RadMediaItem(
+            title: title.isEmpty ? query : title,
+            sourceUrl: source,
+            thumbnailUrl: image,
+            mediaUrl: image,
+          ),
+        );
+        if (results.length >= 36) break;
+      } catch (_) {
+        continue;
+      }
+    }
+    return results;
+  }
+
+  Future<List<RadMediaItem>> _bingVideos(String query) async {
+    final uri = Uri.https('www.bing.com', '/videos/search', {
+      'q': query,
+      'FORM': 'HDRSC4',
+    });
+    final response = await _client.get(uri, headers: _headers);
+    if (response.statusCode < 200 || response.statusCode >= 400) return const [];
+    final doc = html_parser.parse(response.body);
+    final results = <RadMediaItem>[];
+    final seen = <String>{};
+
+    for (final node in doc.querySelectorAll('.mc_vtvc, .mc_vtvc_con_rc, .dg_u')) {
+      final anchor = node.querySelector('a[href]');
+      if (anchor == null) continue;
+      final url = anchor.attributes['href']?.trim() ?? '';
+      final parsed = Uri.tryParse(url);
+      if (parsed == null || !parsed.hasScheme || seen.contains(url)) continue;
+      if (parsed.host.contains('bing.com')) continue;
+      final image = node.querySelector('img');
+      final thumb = image?.attributes['data-src'] ??
+          image?.attributes['src'] ??
+          image?.attributes['data-original'] ??
+          '';
+      var title = _clean(
+        anchor.attributes['aria-label'] ??
+            anchor.attributes['title'] ??
+            node.querySelector('.mc_vtvc_title, .b_promtxt')?.text ??
+            anchor.text,
+      );
+      if (title.isEmpty) title = parsed.host.replaceFirst('www.', '');
+      seen.add(url);
+      results.add(
+        RadMediaItem(
+          title: title,
+          sourceUrl: url,
+          thumbnailUrl: thumb,
+        ),
+      );
+      if (results.length >= 24) break;
     }
     return results;
   }
 
   Future<List<RadSearchItem>> _zarebin(String query) async {
-    // Zarebin's public landing page currently does not expose a stable
-    // server-rendered results endpoint. Try common query parameters first;
-    // if no extractable result is returned, the caller transparently falls
-    // back to another engine instead of showing an empty page.
     for (final key in const ['q', 'query', 'search']) {
       final uri = Uri.https('zarebin.ir', '/', {key: query});
       final response = await _client.get(uri, headers: _headers);
@@ -219,7 +366,7 @@ class RadSearchService {
       final snippet = _snippet(anchor.parent, title);
       seen.add(url);
       results.add(RadSearchItem(title: title, url: url, snippet: snippet));
-      if (results.length >= 20) break;
+      if (results.length >= 30) break;
     }
     return results;
   }
@@ -240,6 +387,18 @@ class RadSearchService {
     final uri = Uri.tryParse(url);
     if (uri == null || !(uri.scheme == 'http' || uri.scheme == 'https')) return false;
     return true;
+  }
+
+  bool _looksLikeVideoHost(String host) {
+    final value = host.toLowerCase();
+    return value.contains('youtube.com') ||
+        value.contains('youtu.be') ||
+        value.contains('aparat.com') ||
+        value.contains('namasha.com') ||
+        value.contains('filmnet.ir') ||
+        value.contains('filimo.com') ||
+        value.contains('namava.ir') ||
+        value.contains('vimeo.com');
   }
 
   String _normalizeGoogleUrl(String raw) {
