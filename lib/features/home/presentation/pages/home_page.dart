@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/url_utils.dart';
@@ -23,9 +24,18 @@ import '../widgets/rad_search_bar.dart';
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
-  void _openBrowser(BuildContext context, WidgetRef ref, String input) {
+  Future<void> _openBrowser(
+    BuildContext context,
+    WidgetRef ref,
+    String input,
+  ) async {
     final value = input.trim();
     if (value.isEmpty) return;
+
+    if (value.startsWith('!')) {
+      final handled = await _handleBang(context, ref, value);
+      if (handled) return;
+    }
 
     final mode = ref.read(networkModeProvider).valueOrNull;
     if (!UrlUtils.looksLikeUrl(value) && mode == NetworkMode.internalOnly) {
@@ -37,8 +47,73 @@ class HomePage extends ConsumerWidget {
         ? value
         : ref.read(settingsProvider).searchEngine.searchUri(value).toString();
 
+    if (!context.mounted) return;
     Navigator.of(context).push(
       MaterialPageRoute<void>(builder: (_) => BrowserPage(initialInput: target)),
+    );
+  }
+
+  Future<bool> _handleBang(
+    BuildContext context,
+    WidgetRef ref,
+    String input,
+  ) async {
+    final firstSpace = input.indexOf(' ');
+    final command = (firstSpace == -1 ? input : input.substring(0, firstSpace))
+        .toLowerCase();
+    final query = firstSpace == -1 ? '' : input.substring(firstSpace + 1).trim();
+
+    switch (command) {
+      case '!ir':
+        _openIranDirectory(context, initialQuery: query);
+        return true;
+      case '!z':
+        if (query.isNotEmpty) {
+          await Clipboard.setData(ClipboardData(text: query));
+        }
+        if (!context.mounted) return true;
+        _openDirect(context, 'https://zarebin.ir/');
+        if (query.isNotEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('عبارت کپی شد؛ در ذره‌بین جای‌گذاری کنید'),
+            ),
+          );
+        }
+        return true;
+      case '!film':
+        _openDirect(context, 'https://filmcase.ir/');
+        return true;
+      case '!nora':
+      case '!shop':
+        _openDirect(context, 'https://noraashop.ir/');
+        return true;
+      case '!news':
+        _openIranDirectory(
+          context,
+          initialQuery: query.isEmpty ? 'خبر' : query,
+        );
+        return true;
+      case '!bank':
+        _openIranDirectory(
+          context,
+          initialQuery: query.isEmpty ? 'بانک' : query,
+        );
+        return true;
+      case '!map':
+        _openIranDirectory(
+          context,
+          initialQuery: query.isEmpty ? 'نقشه' : query,
+        );
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  void _openDirect(BuildContext context, String url) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (_) => BrowserPage(initialInput: url)),
     );
   }
 
@@ -132,12 +207,20 @@ class HomePage extends ConsumerWidget {
                   if (internalOnly) ...[
                     const SizedBox(height: 16),
                     InternalNetworkCard(
-                      onOpenZarebin: () => _openBrowser(
+                      onOpenZarebin: () => _openDirect(
                         context,
-                        ref,
                         'https://zarebin.ir/',
                       ),
                       onOpenDirectory: () => _openIranDirectory(context),
+                    ),
+                    const SizedBox(height: 12),
+                    _EmergencyShortcuts(
+                      onOpen: (query) =>
+                          _openIranDirectory(context, initialQuery: query),
+                      onFilmCase: () =>
+                          _openDirect(context, 'https://filmcase.ir/'),
+                      onNoraaShop: () =>
+                          _openDirect(context, 'https://noraashop.ir/'),
                     ),
                   ],
                   if (offline) ...[
@@ -324,7 +407,7 @@ class HomePage extends ConsumerWidget {
               ),
               ListTile(
                 leading: const Icon(Icons.crop_square_rounded),
-                title: const Text('تب‌ها'),
+                title: const Text('تب‌ها و گروه‌ها'),
                 onTap: () {
                   Navigator.pop(sheetContext);
                   Navigator.of(context).push(
@@ -346,6 +429,77 @@ class HomePage extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _EmergencyShortcuts extends StatelessWidget {
+  const _EmergencyShortcuts({
+    required this.onOpen,
+    required this.onFilmCase,
+    required this.onNoraaShop,
+  });
+
+  final ValueChanged<String> onOpen;
+  final VoidCallback onFilmCase;
+  final VoidCallback onNoraaShop;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: scheme.outlineVariant.withValues(alpha: .45),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'دسترسی سریع داخلی',
+            textDirection: TextDirection.rtl,
+            style: theme.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 7,
+            runSpacing: 7,
+            children: [
+              _EmergencyChip(label: 'بانک', onTap: () => onOpen('بانک')),
+              _EmergencyChip(label: 'دولت', onTap: () => onOpen('دولت')),
+              _EmergencyChip(label: 'خبر', onTap: () => onOpen('خبر')),
+              _EmergencyChip(label: 'نقشه', onTap: () => onOpen('نقشه')),
+              _EmergencyChip(label: 'اپراتور', onTap: () => onOpen('اپراتور')),
+              _EmergencyChip(label: 'فیلم‌کیس', onTap: onFilmCase),
+              _EmergencyChip(label: 'نورا شاپ', onTap: onNoraaShop),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EmergencyChip extends StatelessWidget {
+  const _EmergencyChip({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ActionChip(
+      label: Text(label, textDirection: TextDirection.rtl),
+      onPressed: onTap,
+      visualDensity: VisualDensity.compact,
     );
   }
 }
