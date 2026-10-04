@@ -19,7 +19,6 @@ class _IranDirectoryPageState extends ConsumerState<IranDirectoryPage> {
   @override
   Widget build(BuildContext context) {
     final directory = ref.watch(iranDirectoryProvider);
-    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
