@@ -38,10 +38,9 @@ class NetworkProbeService {
       return NetworkMode.offline;
     }
 
-    final results = await Future.wait<bool>([
-      _anyReachable(internalProbes),
-      _anyReachable(globalProbes),
-    ]);
+    final internalFuture = _anyReachable(internalProbes);
+    final globalFuture = _google204Reachable();
+    final results = await Future.wait<bool>([internalFuture, globalFuture]);
 
     final internalReachable = results[0];
     final globalReachable = results[1];
@@ -52,10 +51,49 @@ class NetworkProbeService {
   }
 
   Stream<NetworkMode> watch() async* {
-    yield await check();
-    await for (final _ in _connectivity.onConnectivityChanged) {
-      yield await check();
+    var last = await check();
+    yield last;
+
+    final connectivityEvents = _connectivity.onConnectivityChanged.asBroadcastStream();
+    final periodic = Stream<void>.periodic(const Duration(seconds: 15));
+    final controller = StreamController<void>();
+    late final StreamSubscription connectivitySub;
+    late final StreamSubscription periodicSub;
+
+    connectivitySub = connectivityEvents.listen((_) => controller.add(null));
+    periodicSub = periodic.listen((_) => controller.add(null));
+
+    try {
+      await for (final _ in controller.stream) {
+        final current = await check();
+        if (current != last) {
+          last = current;
+          yield current;
+        }
+      }
+    } finally {
+      await connectivitySub.cancel();
+      await periodicSub.cancel();
+      await controller.close();
     }
+  }
+
+
+  Future<bool> _google204Reachable() async {
+    for (final uri in globalProbes) {
+      try {
+        final response = await _client
+            .get(uri, headers: const {
+              'Cache-Control': 'no-cache',
+              'User-Agent': 'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/124 Mobile Safari/537.36',
+            })
+            .timeout(_probeTimeout);
+        if (response.statusCode == 204) return true;
+      } on Object {
+        // Try the next probe if one is added later.
+      }
+    }
+    return false;
   }
 
   Future<bool> canReach(Uri uri) => _isReachable(uri);

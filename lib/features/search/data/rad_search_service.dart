@@ -68,8 +68,10 @@ class RadSearchService {
 
   static const _headers = <String, String>{
     'User-Agent':
-        'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Mobile Safari/537.36',
-    'Accept-Language': 'fa-IR,fa;q=0.9,en;q=0.7',
+        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+    'Accept-Language': 'fa-IR,fa;q=0.9,en;q=0.8',
+    'Cookie': 'CONSENT=YES+cb; SOCS=CAESHAgBEhIaAB',
+    'Cache-Control': 'no-cache',
   };
 
   Future<RadSearchResponse> search({
@@ -180,30 +182,74 @@ class RadSearchService {
   }
 
   Future<List<RadSearchItem>> _google(String query, int page) async {
-    final uri = Uri.https('www.google.com', '/search', {
-      'q': query,
-      'hl': 'fa',
-      'num': '20',
-      'start': '${page * 20}',
-      'filter': '0',
-    });
-    final response = await _client.get(uri, headers: _headers);
-    if (response.statusCode < 200 || response.statusCode >= 400) return const [];
-    final doc = html_parser.parse(response.body);
+    final attempts = <Uri>[
+      Uri.https('www.google.com', '/search', {
+        'q': query,
+        'hl': 'fa',
+        'num': '20',
+        'start': '${page * 20}',
+        'filter': '0',
+        'gbv': '1',
+        'udm': '14',
+      }),
+      Uri.https('www.google.com', '/search', {
+        'q': query,
+        'hl': 'fa',
+        'num': '20',
+        'start': '${page * 20}',
+        'filter': '0',
+      }),
+    ];
+
+    for (final uri in attempts) {
+      final response = await _client.get(uri, headers: _headers);
+      if (response.statusCode < 200 || response.statusCode >= 400) continue;
+      final doc = html_parser.parse(response.body);
+      final results = _googleResults(doc, query);
+      if (results.isNotEmpty) return results;
+    }
+    return const [];
+  }
+
+  List<RadSearchItem> _googleResults(Document doc, String query) {
     final results = <RadSearchItem>[];
     final seen = <String>{};
 
-    for (final heading in doc.querySelectorAll('h3')) {
-      final anchor = _nearestAnchor(heading);
+    final candidates = <Element>[];
+    candidates.addAll(doc.querySelectorAll('div.g, div.MjjYud, div[data-snhf], div.tF2Cxc'));
+    if (candidates.isEmpty) candidates.addAll(doc.querySelectorAll('h3'));
+
+    for (final node in candidates) {
+      final heading = node.localName == 'h3' ? node : node.querySelector('h3');
+      final anchor = heading == null
+          ? node.querySelector('a[href]')
+          : (_nearestAnchor(heading) ?? node.querySelector('a[href]'));
       if (anchor == null) continue;
-      final title = _clean(heading.text);
+      final title = _clean(heading?.text ?? anchor.text);
       final url = _normalizeGoogleUrl(anchor.attributes['href'] ?? '');
       if (!_validResult(title, url, seen)) continue;
-      final container = heading.parent?.parent?.parent ?? heading.parent;
-      final snippet = _snippet(container, title);
+      final parsed = Uri.tryParse(url);
+      if (parsed == null || parsed.host.contains('google.')) continue;
+      final snippetNode = node.querySelector('.VwiC3b, .aCOpRe, [data-sncf], .IsZvec');
+      final snippet = _clean(snippetNode?.text ?? _snippet(node, title));
       seen.add(url);
       results.add(RadSearchItem(title: title, url: url, snippet: snippet));
       if (results.length >= 20) break;
+    }
+
+    if (results.isEmpty) {
+      for (final heading in doc.querySelectorAll('h3')) {
+        final anchor = _nearestAnchor(heading);
+        if (anchor == null) continue;
+        final title = _clean(heading.text);
+        final url = _normalizeGoogleUrl(anchor.attributes['href'] ?? '');
+        if (!_validResult(title, url, seen)) continue;
+        final parsed = Uri.tryParse(url);
+        if (parsed == null || parsed.host.contains('google.')) continue;
+        seen.add(url);
+        results.add(RadSearchItem(title: title, url: url, snippet: ''));
+        if (results.length >= 20) break;
+      }
     }
     return results;
   }
@@ -341,29 +387,116 @@ class RadSearchService {
   }
 
   Future<List<RadSearchItem>> _internalSearch(String query, int page) async {
-    for (final key in const ['q', 'query', 'search']) {
-      final params = <String, String>{key: query};
-      if (page > 0) params['page'] = '${page + 1}';
-      final uri = Uri.https('zarebin.ir', '/', params);
-      final response = await _client.get(uri, headers: _headers);
+    final providers = <Uri>[
+      Uri.https('zarebin.ir'),
+      Uri.https('gerdoo.me'),
+      Uri.https('search.bertina.ir'),
+      Uri.https('shaadbin.ir'),
+      Uri.https('2059.ir'),
+    ];
+
+    for (final home in providers) {
+      try {
+        final results = await _submitProviderSearch(home, query, page)
+            .timeout(const Duration(seconds: 8));
+        if (results.isNotEmpty) return results;
+      } catch (_) {
+        continue;
+      }
+    }
+    return const [];
+  }
+
+  Future<List<RadSearchItem>> _submitProviderSearch(
+    Uri home,
+    String query,
+    int page,
+  ) async {
+    final homeResponse = await _client.get(home, headers: _headers);
+    if (homeResponse.statusCode < 200 || homeResponse.statusCode >= 400) {
+      return const [];
+    }
+    final homeDoc = html_parser.parse(homeResponse.body);
+    final forms = homeDoc.querySelectorAll('form');
+
+    for (final form in forms) {
+      Element? queryInput;
+      for (final input in form.querySelectorAll('input')) {
+        final type = (input.attributes['type'] ?? 'text').toLowerCase();
+        final name = input.attributes['name']?.trim() ?? '';
+        if (name.isEmpty) continue;
+        if (type == 'search' || type == 'text') {
+          queryInput = input;
+          break;
+        }
+      }
+      if (queryInput == null) continue;
+
+      final params = <String, String>{};
+      for (final input in form.querySelectorAll('input')) {
+        final name = input.attributes['name']?.trim() ?? '';
+        if (name.isEmpty) continue;
+        final type = (input.attributes['type'] ?? '').toLowerCase();
+        if (type == 'hidden') params[name] = input.attributes['value'] ?? '';
+      }
+      params[queryInput.attributes['name']!] = query;
+      if (page > 0) {
+        params['page'] = '${page + 1}';
+        params['p'] = '${page + 1}';
+        params['start'] = '${page * 10}';
+      }
+
+      final actionRaw = form.attributes['action']?.trim() ?? '';
+      final action = actionRaw.isEmpty ? home : home.resolve(actionRaw);
+      final method = (form.attributes['method'] ?? 'get').toLowerCase();
+      http.Response response;
+      if (method == 'post') {
+        response = await _client.post(action, headers: _headers, body: params);
+      } else {
+        response = await _client.get(
+          action.replace(queryParameters: {...action.queryParameters, ...params}),
+          headers: _headers,
+        );
+      }
       if (response.statusCode < 200 || response.statusCode >= 400) continue;
       final doc = html_parser.parse(response.body);
-      final results = _genericResults(doc);
+      final results = _genericResults(doc, providerHost: home.host);
+      if (results.isNotEmpty) return results;
+    }
+
+    // Compatibility fallback for providers that render the form client-side.
+    for (final key in const ['q', 'query', 'search', 'keyword', 'term']) {
+      final params = <String, String>{key: query};
+      if (page > 0) params['page'] = '${page + 1}';
+      final response = await _client.get(
+        home.replace(queryParameters: params),
+        headers: _headers,
+      );
+      if (response.statusCode < 200 || response.statusCode >= 400) continue;
+      final results = _genericResults(
+        html_parser.parse(response.body),
+        providerHost: home.host,
+      );
       if (results.isNotEmpty) return results;
     }
     return const [];
   }
 
-  List<RadSearchItem> _genericResults(Document doc) {
+  List<RadSearchItem> _genericResults(Document doc, {String? providerHost}) {
     final results = <RadSearchItem>[];
     final seen = <String>{};
     for (final anchor in doc.querySelectorAll('a[href]')) {
       final heading = anchor.querySelector('h1,h2,h3,h4');
       final title = _clean(heading?.text ?? anchor.text);
-      final url = anchor.attributes['href']?.trim() ?? '';
+      var url = anchor.attributes['href']?.trim() ?? '';
+      if (url.startsWith('//')) url = 'https:$url';
+      if (url.startsWith('/') && providerHost != null) {
+        url = Uri.https(providerHost, url).toString();
+      }
       if (!_validResult(title, url, seen)) continue;
       final parsed = Uri.tryParse(url);
-      if (parsed == null || parsed.host.contains('zarebin.ir')) continue;
+      if (parsed == null) continue;
+      if (providerHost != null && parsed.host == providerHost) continue;
       final snippet = _snippet(anchor.parent, title);
       seen.add(url);
       results.add(RadSearchItem(title: title, url: url, snippet: snippet));
