@@ -5,6 +5,7 @@ import '../../../bookmarks/presentation/pages/bookmarks_page.dart';
 import '../../../browser/presentation/controllers/browser_tabs_controller.dart';
 import '../../../browser/presentation/pages/browser_page.dart';
 import '../../../browser/presentation/pages/tabs_page.dart';
+import '../../../downloads/presentation/pages/downloads_page.dart';
 import '../../../history/presentation/pages/history_page.dart';
 import '../../../iran_directory/presentation/pages/iran_directory_page.dart';
 import '../../../network/domain/network_mode.dart';
@@ -114,6 +115,15 @@ class HomePage extends ConsumerWidget {
                           ),
                         ),
                       ),
+                      _HomeAction(
+                        icon: Icons.download_rounded,
+                        label: 'دانلودها',
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const DownloadsPage(),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -214,6 +224,16 @@ class HomePage extends ConsumerWidget {
                   Navigator.pop(sheetContext);
                   Navigator.of(context).push(
                     MaterialPageRoute<void>(builder: (_) => const HistoryPage()),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.download_rounded),
+                title: const Text('دانلودها'),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(builder: (_) => const DownloadsPage()),
                   );
                 },
               ),
