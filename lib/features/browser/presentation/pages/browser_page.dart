@@ -103,6 +103,13 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
 
   List<ContentBlocker> _contentBlockers(AppSettings settings) {
     final blockers = <ContentBlocker>[];
+    final exceptionTopUrls = <String>[];
+    for (final host in TrackingExceptionRegistry.hosts) {
+      final escaped = RegExp.escape(host);
+      exceptionTopUrls.add(
+        '^https?://(?:[^/]+\\.)?$escaped(?:/.*)?\$',
+      );
+    }
     if (settings.httpsFirst) {
       blockers.add(
         ContentBlocker(
@@ -142,7 +149,10 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
     for (final filter in filters) {
       blockers.add(
         ContentBlocker(
-          trigger: ContentBlockerTrigger(urlFilter: filter),
+          trigger: ContentBlockerTrigger(
+            urlFilter: filter,
+            unlessTopUrl: exceptionTopUrls,
+          ),
           action: ContentBlockerAction(type: ContentBlockerActionType.BLOCK),
         ),
       );
