@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../controllers/browser_tabs_controller.dart';
 import 'browser_page.dart';
+import 'private_browser_page.dart';
 
 class TabsPage extends ConsumerWidget {
   const TabsPage({super.key});
@@ -31,7 +32,7 @@ class TabsPage extends ConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Navigator.of(context).popUntil((route) => route.isFirst),
+        onPressed: () => _showNewTabMenu(context),
         icon: const Icon(Icons.add_rounded),
         label: const Text('تب جدید'),
       ),
@@ -65,7 +66,7 @@ class TabsPage extends ConsumerWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'یک تب جدید باز کنید و مرور را شروع کنید.',
+                      'تب عادی یا خصوصی باز کنید و مرور را شروع کنید.',
                       textDirection: TextDirection.rtl,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: scheme.onSurfaceVariant,
@@ -116,6 +117,45 @@ class TabsPage extends ConsumerWidget {
                 );
               },
             ),
+    );
+  }
+
+  Future<void> _showNewTabMenu(BuildContext context) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.add_box_outlined),
+                title: const Text('تب عادی جدید'),
+                subtitle: const Text('تاریخچه و نشست مرور ذخیره می‌شود.'),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.visibility_off_rounded),
+                title: const Text('تب خصوصی جدید'),
+                subtitle: const Text('بدون ثبت تاریخچه و بدون بازیابی نشست.'),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const PrivateBrowserPage(),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
