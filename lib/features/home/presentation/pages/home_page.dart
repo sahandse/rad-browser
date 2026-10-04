@@ -14,6 +14,7 @@ import '../../../network/presentation/network_providers.dart';
 import '../../../settings/domain/app_settings.dart';
 import '../../../settings/presentation/controllers/settings_controller.dart';
 import '../../../settings/presentation/pages/settings_page.dart';
+import '../widgets/internal_network_card.dart';
 import '../widgets/network_status_chip.dart';
 import '../widgets/rad_search_bar.dart';
 
@@ -30,6 +31,12 @@ class HomePage extends ConsumerWidget {
 
     Navigator.of(context).push(
       MaterialPageRoute<void>(builder: (_) => BrowserPage(initialInput: target)),
+    );
+  }
+
+  void _openIranDirectory(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (_) => const IranDirectoryPage()),
     );
   }
 
@@ -102,6 +109,17 @@ class HomePage extends ConsumerWidget {
                   RadSearchBar(
                     onSubmitted: (value) => _openBrowser(context, ref, value),
                   ),
+                  if (internalOnly) ...[
+                    const SizedBox(height: 16),
+                    InternalNetworkCard(
+                      onOpenZarebin: () => _openBrowser(
+                        context,
+                        ref,
+                        'https://zarebin.ir/',
+                      ),
+                      onOpenDirectory: () => _openIranDirectory(context),
+                    ),
+                  ],
                   const SizedBox(height: 26),
                   Wrap(
                     alignment: WrapAlignment.center,
@@ -111,11 +129,7 @@ class HomePage extends ConsumerWidget {
                       _HomeAction(
                         icon: Icons.language_rounded,
                         label: 'ایران وب',
-                        onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => const IranDirectoryPage(),
-                          ),
-                        ),
+                        onTap: () => _openIranDirectory(context),
                       ),
                       _HomeAction(
                         icon: Icons.star_border_rounded,
@@ -230,11 +244,7 @@ class HomePage extends ConsumerWidget {
                 title: const Text('ایران وب'),
                 onTap: () {
                   Navigator.pop(sheetContext);
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => const IranDirectoryPage(),
-                    ),
-                  );
+                  _openIranDirectory(context);
                 },
               ),
               ListTile(
