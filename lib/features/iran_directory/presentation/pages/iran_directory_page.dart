@@ -38,9 +38,7 @@ class _IranDirectoryPageState extends ConsumerState<IranDirectoryPage> {
     final directory = ref.watch(iranDirectoryProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('ایران وب'),
-      ),
+      appBar: AppBar(title: const Text('ایران وب')),
       body: SafeArea(
         child: directory.when(
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -55,7 +53,9 @@ class _IranDirectoryPageState extends ConsumerState<IranDirectoryPage> {
                     final haystack = [
                       site.name,
                       site.url.host,
+                      site.description,
                       ...site.keywords,
+                      ...site.features,
                     ].join(' ').toLowerCase();
                     return haystack.contains(q);
                   }).toList(growable: false);
@@ -89,10 +89,7 @@ class _IranDirectoryPageState extends ConsumerState<IranDirectoryPage> {
                           padding: const EdgeInsets.fromLTRB(12, 6, 12, 24),
                           itemCount: filtered.length,
                           separatorBuilder: (_, __) => const Divider(height: 1),
-                          itemBuilder: (context, index) {
-                            final site = filtered[index];
-                            return _SiteTile(site: site);
-                          },
+                          itemBuilder: (context, index) => _SiteTile(site: filtered[index]),
                         ),
                 ),
               ],
@@ -122,19 +119,13 @@ class _NoLocalResult extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.travel_explore_rounded,
-                size: 44,
-                color: scheme.primary,
-              ),
+              Icon(Icons.travel_explore_rounded, size: 44, color: scheme.primary),
               const SizedBox(height: 16),
               Text(
                 'در فهرست محلی نتیجه‌ای پیدا نشد',
                 textDirection: TextDirection.rtl,
                 textAlign: TextAlign.center,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
               ),
               const SizedBox(height: 8),
               Text(
@@ -156,9 +147,7 @@ class _NoLocalResult extends StatelessWidget {
                   if (!context.mounted) return;
                   Navigator.of(context).push(
                     MaterialPageRoute<void>(
-                      builder: (_) => const BrowserPage(
-                        initialInput: 'https://zarebin.ir/',
-                      ),
+                      builder: (_) => const BrowserPage(initialInput: 'https://zarebin.ir/'),
                     ),
                   );
                 },
@@ -186,14 +175,12 @@ class _SiteTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final reachable = ref.watch(siteReachabilityProvider(site.url));
     final scheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
 
     return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
       leading: CircleAvatar(
-        child: Text(
-          site.name.characters.first,
-          textDirection: TextDirection.rtl,
-        ),
+        child: Text(site.name.characters.first, textDirection: TextDirection.rtl),
       ),
       title: Text(
         site.name,
@@ -201,10 +188,30 @@ class _SiteTile extends ConsumerWidget {
         overflow: TextOverflow.ellipsis,
         textDirection: TextDirection.rtl,
       ),
-      subtitle: Text(
-        site.url.host,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (site.description.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              site.description,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textDirection: TextDirection.rtl,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+                height: 1.5,
+              ),
+            ),
+          ],
+          const SizedBox(height: 3),
+          Text(
+            site.url.host,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.labelSmall,
+          ),
+        ],
       ),
       trailing: reachable.when(
         loading: () => const SizedBox(
