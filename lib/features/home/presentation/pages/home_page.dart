@@ -1,41 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../browser/presentation/pages/browser_page.dart';
 import '../../../network/domain/network_mode.dart';
+import '../../../network/presentation/network_providers.dart';
 import '../widgets/network_status_chip.dart';
 import '../widgets/rad_search_bar.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
   static const _shortcuts = <({IconData icon, String label})>[
     (icon: Icons.language_rounded, label: 'ایران وب'),
-    (icon: Icons.account_balance_rounded, label: 'بانک‌ها'),
-    (icon: Icons.apartment_rounded, label: 'دولت'),
-    (icon: Icons.newspaper_rounded, label: 'خبر'),
-    (icon: Icons.shopping_bag_rounded, label: 'خرید'),
-    (icon: Icons.school_rounded, label: 'آموزش'),
+    (icon: Icons.account_balance_outlined, label: 'بانک‌ها'),
+    (icon: Icons.apartment_outlined, label: 'دولت'),
+    (icon: Icons.newspaper_outlined, label: 'خبر'),
+    (icon: Icons.shopping_bag_outlined, label: 'خرید'),
+    (icon: Icons.school_outlined, label: 'آموزش'),
   ];
 
   void _openBrowser(BuildContext context, String input) {
     if (input.trim().isEmpty) return;
     Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => BrowserPage(initialInput: input),
-      ),
+      MaterialPageRoute<void>(builder: (_) => BrowserPage(initialInput: input)),
     );
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final network = ref.watch(networkModeProvider);
+    final mode = network.valueOrNull;
+    final internalOnly = mode == NetworkMode.internalOnly;
 
     return Scaffold(
+      backgroundColor: scheme.surface,
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(20, 22, 20, 32),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 36),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 720),
               child: Column(
@@ -45,20 +50,42 @@ class HomePage extends StatelessWidget {
                       IconButton(
                         tooltip: 'منو',
                         onPressed: () {},
-                        icon: const Icon(Icons.more_vert_rounded),
+                        icon: const Icon(Icons.more_horiz_rounded),
                       ),
                       const Spacer(),
-                      const NetworkStatusChip(mode: NetworkMode.fullInternet),
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 240),
+                        child: mode == null
+                            ? const _NetworkCheckingChip()
+                            : NetworkStatusChip(key: ValueKey(mode), mode: mode),
+                      ),
                     ],
                   ),
-                  const SizedBox(height: 54),
+                  SizedBox(height: MediaQuery.sizeOf(context).height < 700 ? 34 : 62),
                   _RadMark(theme: theme),
                   const SizedBox(height: 30),
-                  RadSearchBar(onSubmitted: (value) => _openBrowser(context, value)),
-                  const SizedBox(height: 28),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 240),
+                    child: internalOnly
+                        ? Text(
+                            'شبکه داخلی فعال است',
+                            key: const ValueKey('internal-title'),
+                            textDirection: TextDirection.rtl,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: scheme.primary,
+                            ),
+                          )
+                        : const SizedBox.shrink(key: ValueKey('normal-title')),
+                  ),
+                  if (internalOnly) const SizedBox(height: 14),
+                  RadSearchBar(
+                    onSubmitted: (value) => _openBrowser(context, value),
+                  ),
+                  const SizedBox(height: 30),
                   Wrap(
                     alignment: WrapAlignment.center,
-                    spacing: 16,
+                    spacing: 14,
                     runSpacing: 18,
                     children: _shortcuts
                         .map(
@@ -70,11 +97,18 @@ class HomePage extends StatelessWidget {
                         )
                         .toList(),
                   ),
-                  const SizedBox(height: 46),
-                  TextButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.add_rounded, size: 18),
-                    label: const Text('افزودن میانبر'),
+                  const SizedBox(height: 40),
+                  Divider(color: scheme.outlineVariant.withValues(alpha: .5), height: 1),
+                  const SizedBox(height: 18),
+                  Text(
+                    internalOnly
+                        ? 'جستجو و باز کردن سایت‌های در دسترس ایران ادامه دارد.'
+                        : 'راد برای وب سریع، خلوت و قابل‌اعتماد طراحی شده است.',
+                    textAlign: TextAlign.center,
+                    textDirection: TextDirection.rtl,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -84,13 +118,19 @@ class HomePage extends StatelessWidget {
       ),
       bottomNavigationBar: SafeArea(
         top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 6, 16, 10),
+        child: Container(
+          margin: const EdgeInsets.fromLTRB(14, 0, 14, 10),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+          decoration: BoxDecoration(
+            color: scheme.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(26),
+            border: Border.all(color: scheme.outlineVariant.withValues(alpha: .45)),
+          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              IconButton(onPressed: () {}, icon: const Icon(Icons.arrow_back_rounded)),
-              IconButton(onPressed: () {}, icon: const Icon(Icons.arrow_forward_rounded)),
+              IconButton(onPressed: null, icon: const Icon(Icons.arrow_back_rounded)),
+              IconButton(onPressed: null, icon: const Icon(Icons.arrow_forward_rounded)),
               IconButton(onPressed: () {}, icon: const Icon(Icons.home_rounded)),
               Badge(
                 label: const Text('1'),
@@ -108,6 +148,35 @@ class HomePage extends StatelessWidget {
   }
 }
 
+class _NetworkCheckingChip extends StatelessWidget {
+  const _NetworkCheckingChip();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      height: 32,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHighest.withValues(alpha: .55),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: 12,
+            height: 12,
+            child: CircularProgressIndicator(strokeWidth: 1.7, color: scheme.primary),
+          ),
+          const SizedBox(width: 8),
+          const Text('بررسی شبکه', textDirection: TextDirection.rtl),
+        ],
+      ),
+    );
+  }
+}
+
 class _RadMark extends StatelessWidget {
   const _RadMark({required this.theme});
 
@@ -115,31 +184,47 @@ class _RadMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = theme.colorScheme;
     return Column(
       children: [
         Container(
-          width: 64,
-          height: 64,
+          width: 68,
+          height: 68,
           decoration: BoxDecoration(
-            color: theme.colorScheme.primary,
-            borderRadius: BorderRadius.circular(20),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [scheme.primary, scheme.primary.withValues(alpha: .72)],
+            ),
+            borderRadius: BorderRadius.circular(22),
+            boxShadow: [
+              BoxShadow(
+                color: scheme.primary.withValues(alpha: .18),
+                blurRadius: 28,
+                offset: const Offset(0, 12),
+              ),
+            ],
           ),
           alignment: Alignment.center,
           child: const Text(
             'R',
             style: TextStyle(
               color: Colors.white,
-              fontSize: 36,
+              fontSize: 37,
               height: 1,
               fontWeight: FontWeight.w800,
+              letterSpacing: -2,
             ),
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 14),
         Text(
           'راد',
           textDirection: TextDirection.rtl,
-          style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+          style: theme.textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w800,
+            letterSpacing: -.4,
+          ),
         ),
       ],
     );
@@ -155,32 +240,34 @@ class _Shortcut extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     return SizedBox(
-      width: 74,
+      width: 76,
       child: InkWell(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(22),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6),
+          padding: const EdgeInsets.symmetric(vertical: 7),
           child: Column(
             children: [
               Container(
-                width: 48,
-                height: 48,
+                width: 50,
+                height: 50,
                 decoration: BoxDecoration(
-                  color: scheme.surfaceContainerHighest.withValues(alpha: .55),
+                  color: scheme.surfaceContainerHighest.withValues(alpha: .58),
                   shape: BoxShape.circle,
+                  border: Border.all(color: scheme.outlineVariant.withValues(alpha: .28)),
                 ),
-                child: Icon(icon, size: 22),
+                child: Icon(icon, size: 21, color: scheme.onSurface),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 9),
               Text(
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 textDirection: TextDirection.rtl,
-                style: Theme.of(context).textTheme.labelMedium,
+                style: theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w500),
               ),
             ],
           ),
