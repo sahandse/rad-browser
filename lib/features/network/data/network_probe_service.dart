@@ -9,14 +9,12 @@ class NetworkProbeService {
   NetworkProbeService({
     Connectivity? connectivity,
     http.Client? client,
-    this.internalProbe = const Uri(scheme: 'https', host: 'www.nic.ir'),
-    this.globalProbe = const Uri(
-      scheme: 'https',
-      host: 'www.google.com',
-      path: '/generate_204',
-    ),
+    Uri? internalProbe,
+    Uri? globalProbe,
   })  : _connectivity = connectivity ?? Connectivity(),
-        _client = client ?? http.Client();
+        _client = client ?? http.Client(),
+        internalProbe = internalProbe ?? Uri.https('www.nic.ir'),
+        globalProbe = globalProbe ?? Uri.https('www.google.com', '/generate_204');
 
   final Connectivity _connectivity;
   final http.Client _client;
@@ -27,7 +25,8 @@ class NetworkProbeService {
 
   Future<NetworkMode> check() async {
     final transports = await _connectivity.checkConnectivity();
-    if (transports.isEmpty || transports.every((item) => item == ConnectivityResult.none)) {
+    if (transports.isEmpty ||
+        transports.every((item) => item == ConnectivityResult.none)) {
       return NetworkMode.offline;
     }
 
