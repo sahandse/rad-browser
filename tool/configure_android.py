@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-import re
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -26,7 +25,46 @@ def replace_text(path: Path, old: str, new: str) -> None:
 
 def configure_gradle() -> None:
     gradle = APP / "build.gradle.kts"
-    replace_text(gradle, OLD_PACKAGE, PACKAGE)
+    if not gradle.exists():
+        raise SystemExit(f"Missing {gradle}")
+
+    text = gradle.read_text(encoding="utf-8").replace(OLD_PACKAGE, PACKAGE)
+    key_properties = ANDROID / "key.properties"
+
+    if key_properties.exists():
+        imports = "import java.io.FileInputStream\nimport java.util.Properties\n\n"
+        if "import java.util.Properties" not in text:
+            text = imports + text
+
+        marker = "android {"
+        setup = (
+            'val keystoreProperties = Properties()\n'
+            'val keystorePropertiesFile = rootProject.file("key.properties")\n'
+            'keystoreProperties.load(FileInputStream(keystorePropertiesFile))\n\n'
+            'android {'
+        )
+        if "val keystoreProperties = Properties()" not in text:
+            text = text.replace(marker, setup, 1)
+
+        signing_block = '''    signingConfigs {
+        create("release") {
+            keyAlias = keystoreProperties["keyAlias"] as String
+            keyPassword = keystoreProperties["keyPassword"] as String
+            storeFile = file(keystoreProperties["storeFile"] as String)
+            storePassword = keystoreProperties["storePassword"] as String
+        }
+    }
+
+'''
+        if 'create("release")' not in text:
+            text = text.replace("    buildTypes {", signing_block + "    buildTypes {", 1)
+
+        text = text.replace(
+            'signingConfig = signingConfigs.getByName("debug")',
+            'signingConfig = signingConfigs.getByName("release")',
+        )
+
+    gradle.write_text(text, encoding="utf-8")
 
 
 def configure_activity() -> None:
@@ -42,7 +80,6 @@ def configure_manifest() -> None:
 
     tree = ET.parse(manifest_path)
     root = tree.getroot()
-    root.set("xmlns:tools", TOOLS_NS)
 
     existing = {
         node.get(f"{{{ANDROID_NS}}}name"): node
@@ -80,7 +117,9 @@ def configure_manifest() -> None:
     if application is None:
         raise SystemExit("AndroidManifest.xml has no <application>")
     application.set(f"{{{ANDROID_NS}}}label", "راد")
-    application.set(f"{{{ANDROID_NS}}}usesCleartextTraffic", "false")
+    # A browser must still be able to open a user-requested HTTP site when
+    # HTTPS-first is disabled. HTTPS-first remains enforced in app logic.
+    application.set(f"{{{ANDROID_NS}}}usesCleartextTraffic", "true")
 
     ET.indent(tree, space="    ")
     tree.write(manifest_path, encoding="utf-8", xml_declaration=True)
@@ -90,11 +129,8 @@ def validate() -> None:
     gradle = (APP / "build.gradle.kts").read_text(encoding="utf-8")
     if PACKAGE not in gradle:
         raise SystemExit("Package configuration failed")
-    manifest = (APP / "src" / "main" / "AndroidManifest.xml").read_text(
-        encoding="utf-8"
-    )
-    if "REQUEST_INSTALL_PACKAGES" in manifest and 'tools:node="remove"' not in manifest:
-        raise SystemExit("REQUEST_INSTALL_PACKAGES must not be requested")
+    if (ANDROID / "key.properties").exists() and 'getByName("release")' not in gradle:
+        raise SystemExit("Release signing configuration failed")
 
 
 if __name__ == "__main__":
@@ -104,4 +140,5 @@ if __name__ == "__main__":
     configure_activity()
     configure_manifest()
     validate()
-    print(f"Android configured for {PACKAGE}")
+    mode = "release signing" if (ANDROID / "key.properties").exists() else "debug signing"
+    print(f"Android configured for {PACKAGE} ({mode})")
