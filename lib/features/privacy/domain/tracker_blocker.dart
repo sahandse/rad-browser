@@ -1,7 +1,80 @@
+import 'dart:async';
+
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../settings/domain/app_settings.dart';
 
+class TrackingExceptionRegistry {
+  static const storageKey = 'rad.trackingExceptions.v1';
+  static final Set<String> _hosts = <String>{};
+  static bool _loaded = false;
+
+  static Set<String> get hosts => Set.unmodifiable(_hosts);
+
+  static Future<void> ensureLoaded() async {
+    if (_loaded) return;
+    final prefs = await SharedPreferences.getInstance();
+    _hosts
+      ..clear()
+      ..addAll(
+        (prefs.getStringList(storageKey) ?? const <String>[])
+            .map(_normalize)
+            .where((host) => host.isNotEmpty),
+      );
+    _loaded = true;
+  }
+
+  static bool contains(String host) {
+    final value = _normalize(host);
+    if (value.isEmpty) return false;
+    return _hosts.any(
+      (exception) =>
+          value == exception || value.endsWith('.$exception'),
+    );
+  }
+
+  static Future<void> add(String host) async {
+    await ensureLoaded();
+    final value = _normalize(host);
+    if (value.isEmpty) return;
+    _hosts.add(value);
+    await _persist();
+  }
+
+  static Future<void> remove(String host) async {
+    await ensureLoaded();
+    _hosts.remove(_normalize(host));
+    await _persist();
+  }
+
+  static Future<void> clear() async {
+    await ensureLoaded();
+    _hosts.clear();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(storageKey);
+  }
+
+  static Future<void> _persist() async {
+    final prefs = await SharedPreferences.getInstance();
+    final sorted = _hosts.toList()..sort();
+    await prefs.setStringList(storageKey, sorted);
+  }
+
+  static String _normalize(String value) {
+    var host = value.trim().toLowerCase();
+    final uri = Uri.tryParse(
+      host.contains('://') ? host : 'https://$host',
+    );
+    if (uri != null && uri.host.isNotEmpty) host = uri.host.toLowerCase();
+    if (host.startsWith('www.')) host = host.substring(4);
+    return host.replaceAll(RegExp(r'^\.+|\.+$'), '');
+  }
+}
+
 class TrackerBlocker {
-  TrackerBlocker(this.mode);
+  TrackerBlocker(this.mode) {
+    unawaited(TrackingExceptionRegistry.ensureLoaded());
+  }
 
   final RadTrackingProtection mode;
 
@@ -39,6 +112,10 @@ class TrackerBlocker {
     if (requestHost.isEmpty) return false;
 
     final topHost = topLevel == null ? '' : _normalizedHost(topLevel.host);
+    if (topHost.isNotEmpty && TrackingExceptionRegistry.contains(topHost)) {
+      return false;
+    }
+
     final thirdParty = topHost.isNotEmpty && !_sameSite(requestHost, topHost);
     if (!thirdParty) return false;
 
