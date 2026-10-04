@@ -11,6 +11,8 @@ import '../../../history/presentation/controllers/history_controller.dart';
 import '../../../history/presentation/pages/history_page.dart';
 import '../../../network/domain/network_mode.dart';
 import '../../../network/presentation/network_providers.dart';
+import '../../../offline/presentation/controllers/offline_pages_controller.dart';
+import '../../../offline/presentation/pages/offline_pages_page.dart';
 import '../../../settings/domain/app_settings.dart';
 import '../../../settings/presentation/controllers/settings_controller.dart';
 import '../../../settings/presentation/pages/settings_page.dart';
@@ -123,6 +125,47 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
   void _openDownloads() {
     Navigator.of(context).push(
       MaterialPageRoute<void>(builder: (_) => const DownloadsPage()),
+    );
+  }
+
+  void _openOfflinePages() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (_) => const OfflinePagesPage()),
+    );
+  }
+
+  Future<void> _saveOfflinePage() async {
+    final controller = _webViewController;
+    if (controller == null || _mainFrameFailed || _isLoading) return;
+
+    final raw = await controller.evaluateJavascript(
+      source: 'document.body ? document.body.innerText : ""',
+    );
+    final content = raw?.toString().trim() ?? '';
+    if (content.isEmpty || content == 'null') {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('محتوایی برای ذخیره پیدا نشد')),
+      );
+      return;
+    }
+
+    final title = _currentTitle.isEmpty ? _currentUri.host : _currentTitle;
+    await ref.read(offlinePagesProvider.notifier).save(
+          url: _currentUri,
+          title: title,
+          content: content,
+        );
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('صفحه برای مطالعه آفلاین ذخیره شد'),
+        action: SnackBarAction(
+          label: 'مشاهده',
+          onPressed: _openOfflinePages,
+        ),
+      ),
     );
   }
 
@@ -480,6 +523,25 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
                 },
               ),
               ListTile(
+                leading: const Icon(Icons.offline_pin_outlined),
+                title: const Text('ذخیره برای مطالعه آفلاین'),
+                enabled: !_isLoading && !_mainFrameFailed,
+                onTap: !_isLoading && !_mainFrameFailed
+                    ? () async {
+                        Navigator.pop(sheetContext);
+                        await _saveOfflinePage();
+                      }
+                    : null,
+              ),
+              ListTile(
+                leading: const Icon(Icons.article_outlined),
+                title: const Text('صفحات آفلاین'),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  _openOfflinePages();
+                },
+              ),
+              ListTile(
                 leading: const Icon(Icons.star_outline_rounded),
                 title: const Text('نشانک‌ها'),
                 onTap: () {
@@ -578,7 +640,7 @@ class _BrowserErrorView extends StatelessWidget {
       NetworkMode.offline => (
           Icons.cloud_off_rounded,
           'اتصال شبکه وجود ندارد',
-          'پس از برقراری اتصال دوباره تلاش کنید.'
+          'صفحات ذخیره‌شده، نشانک‌ها و ایران وب از صفحه اصلی همچنان در دسترس‌اند.'
         ),
       NetworkMode.internalOnly when !isIr => (
           Icons.public_off_rounded,
