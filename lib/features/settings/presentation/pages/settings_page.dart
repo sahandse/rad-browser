@@ -7,7 +7,6 @@ import '../../../history/presentation/controllers/history_controller.dart';
 import '../../../permissions/presentation/pages/site_permissions_page.dart';
 import '../../../privacy/presentation/pages/tracking_exceptions_page.dart';
 import '../../../sync/presentation/pages/backup_sync_page.dart';
-import '../../domain/app_settings.dart';
 import '../controllers/settings_controller.dart';
 
 class SettingsPage extends ConsumerWidget {
