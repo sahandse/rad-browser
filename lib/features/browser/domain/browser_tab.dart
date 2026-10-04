@@ -31,4 +31,26 @@ class BrowserTab {
       progress: progress ?? this.progress,
     );
   }
+
+  Map<String, Object?> toJson() => {
+        'id': id,
+        'url': url.toString(),
+        'title': title,
+        'faviconUrl': faviconUrl?.toString(),
+      };
+
+  factory BrowserTab.fromJson(Map<String, Object?> json) {
+    final url = Uri.parse(json['url']! as String);
+    final favicon = json['faviconUrl'] as String?;
+    return BrowserTab(
+      id: json['id']! as String,
+      url: url,
+      title: (json['title'] as String?)?.trim().isNotEmpty == true
+          ? json['title']! as String
+          : url.host,
+      faviconUrl: favicon == null || favicon.isEmpty ? null : Uri.tryParse(favicon),
+      isLoading: false,
+      progress: 1,
+    );
+  }
 }
