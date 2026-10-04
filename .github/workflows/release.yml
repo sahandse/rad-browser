@@ -1,0 +1,132 @@
+name: RAD Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag, e.g. v1.0.0'
+        required: true
+        default: 'v1.0.0'
+      publish:
+        description: 'Publish GitHub Release after successful builds'
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Generate platform scaffolding
+        run: |
+          if [ ! -d android ]; then
+            flutter create . --project-name rad_browser --org com.sahand --platforms=android
+          fi
+          if [ ! -f web/index.html ]; then
+            flutter create . --project-name rad_browser --org com.sahand --platforms=web
+          fi
+          rm -f test/widget_test.dart
+
+      - name: Validate requested release version
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          APP_VERSION="$(awk '/^version:/ {print $2}' pubspec.yaml | cut -d+ -f1)"
+          if [ "$RELEASE_TAG" != "v$APP_VERSION" ]; then
+            echo "Tag $RELEASE_TAG does not match pubspec version v$APP_VERSION"
+            exit 1
+          fi
+
+      - name: Prepare signing material
+        env:
+          KEYSTORE_BASE64: ${{ secrets.RAD_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.RAD_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.RAD_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.RAD_KEY_PASSWORD }}
+          PUBLISH: ${{ inputs.publish }}
+        run: |
+          if [ "$PUBLISH" = "true" ]; then
+            test -n "$KEYSTORE_BASE64" || { echo 'Missing RAD_KEYSTORE_BASE64'; exit 1; }
+            test -n "$STORE_PASSWORD" || { echo 'Missing RAD_KEYSTORE_PASSWORD'; exit 1; }
+            test -n "$KEY_ALIAS" || { echo 'Missing RAD_KEY_ALIAS'; exit 1; }
+            test -n "$KEY_PASSWORD" || { echo 'Missing RAD_KEY_PASSWORD'; exit 1; }
+          fi
+
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 --decode > android/app/rad-release.jks
+            cat > android/key.properties <<EOF
+          storePassword=$STORE_PASSWORD
+          keyPassword=$KEY_PASSWORD
+          keyAlias=$KEY_ALIAS
+          storeFile=rad-release.jks
+          EOF
+          fi
+
+      - name: Configure Android package and permissions
+        run: python3 tool/configure_android.py
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Quality checks
+        run: |
+          flutter analyze --no-fatal-infos
+          if [ -d test ] && find test -name '*_test.dart' -print -quit | grep -q .; then
+            flutter test
+          fi
+
+      - name: Build release APK and AAB
+        run: |
+          flutter build apk --release
+          flutter build appbundle --release
+
+      - name: Audit release manifest
+        run: |
+          unzip -p build/app/outputs/flutter-apk/app-release.apk AndroidManifest.xml > /tmp/rad-manifest.bin
+          strings -el /tmp/rad-manifest.bin > /tmp/rad-manifest.txt
+          grep -q 'com.sahand.rad' /tmp/rad-manifest.txt
+          if grep -Eq 'android.permission.(READ_EXTERNAL_STORAGE|WRITE_EXTERNAL_STORAGE|REQUEST_INSTALL_PACKAGES)' /tmp/rad-manifest.txt; then
+            echo 'Forbidden Android permission found in merged release manifest.'
+            exit 1
+          fi
+
+      - name: Build Web release
+        run: |
+          flutter build web --release
+          (cd build && zip -qr rad-web-${{ inputs.tag }}.zip web)
+
+      - name: Prepare release files and checksums
+        run: |
+          mkdir -p dist
+          cp build/app/outputs/flutter-apk/app-release.apk "dist/rad-${{ inputs.tag }}.apk"
+          cp build/app/outputs/bundle/release/app-release.aab "dist/rad-${{ inputs.tag }}.aab"
+          cp "build/rad-web-${{ inputs.tag }}.zip" "dist/rad-web-${{ inputs.tag }}.zip"
+          (cd dist && sha256sum * > SHA256SUMS.txt)
+
+      - name: Upload release candidate artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: rad-${{ inputs.tag }}-release-candidate
+          path: dist/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Publish GitHub Release
+        if: ${{ inputs.publish }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          gh release create "$RELEASE_TAG" dist/* \
+            --title "RAD $RELEASE_TAG" \
+            --generate-notes
