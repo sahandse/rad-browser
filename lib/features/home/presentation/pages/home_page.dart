@@ -55,7 +55,7 @@ class HomePage extends ConsumerWidget {
                 children: [
                   Row(
                     children: [
-                      IconButton(
+                      IconButton.filledTonal(
                         tooltip: 'منو',
                         onPressed: () => _showHomeMenu(context),
                         icon: const Icon(Icons.more_horiz_rounded),
@@ -70,20 +70,30 @@ class HomePage extends ConsumerWidget {
                     ],
                   ),
                   SizedBox(
-                    height: MediaQuery.sizeOf(context).height < 700 ? 52 : 82,
+                    height: MediaQuery.sizeOf(context).height < 700 ? 48 : 78,
                   ),
                   _RadMark(theme: theme),
                   const SizedBox(height: 34),
                   AnimatedSwitcher(
                     duration: const Duration(milliseconds: 240),
                     child: internalOnly
-                        ? Text(
-                            'شبکه داخلی فعال است',
+                        ? Container(
                             key: const ValueKey('internal-title'),
-                            textDirection: TextDirection.rtl,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: scheme.primary,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 7,
+                            ),
+                            decoration: BoxDecoration(
+                              color: scheme.primaryContainer.withValues(alpha: .55),
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            child: Text(
+                              'شبکه داخلی فعال است',
+                              textDirection: TextDirection.rtl,
+                              style: theme.textTheme.labelLarge?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: scheme.onPrimaryContainer,
+                              ),
                             ),
                           )
                         : const SizedBox.shrink(key: ValueKey('normal-title')),
@@ -92,11 +102,11 @@ class HomePage extends ConsumerWidget {
                   RadSearchBar(
                     onSubmitted: (value) => _openBrowser(context, ref, value),
                   ),
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 26),
                   Wrap(
                     alignment: WrapAlignment.center,
-                    spacing: 12,
-                    runSpacing: 10,
+                    spacing: 10,
+                    runSpacing: 8,
                     children: [
                       _HomeAction(
                         icon: Icons.language_rounded,
@@ -144,51 +154,62 @@ class HomePage extends ConsumerWidget {
       ),
       bottomNavigationBar: SafeArea(
         top: false,
-        child: Container(
-          margin: const EdgeInsets.fromLTRB(14, 0, 14, 10),
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-          decoration: BoxDecoration(
-            color: scheme.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(26),
-            border: Border.all(
-              color: scheme.outlineVariant.withValues(alpha: .45),
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              const IconButton(
-                tooltip: 'عقب',
-                onPressed: null,
-                icon: Icon(Icons.arrow_back_rounded),
-              ),
-              const IconButton(
-                tooltip: 'جلو',
-                onPressed: null,
-                icon: Icon(Icons.arrow_forward_rounded),
-              ),
-              IconButton(
-                tooltip: 'خانه',
-                onPressed: () {},
-                icon: const Icon(Icons.home_rounded),
-              ),
-              Badge(
-                isLabelVisible: tabCount > 0,
-                label: Text('$tabCount'),
-                child: IconButton(
-                  tooltip: 'تب‌ها',
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(builder: (_) => const TabsPage()),
-                  ),
-                  icon: const Icon(Icons.crop_square_rounded),
+        minimum: const EdgeInsets.only(bottom: 10),
+        child: Center(
+          heightFactor: 1,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 250),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: scheme.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(
+                  color: scheme.outlineVariant.withValues(alpha: .48),
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: .05),
+                    blurRadius: 18,
+                    offset: const Offset(0, 7),
+                  ),
+                ],
               ),
-              IconButton(
-                tooltip: 'منو',
-                onPressed: () => _showHomeMenu(context),
-                icon: const Icon(Icons.menu_rounded),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: scheme.primaryContainer,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.home_rounded,
+                      size: 21,
+                      color: scheme.onPrimaryContainer,
+                    ),
+                  ),
+                  Badge(
+                    isLabelVisible: tabCount > 0,
+                    label: Text('$tabCount'),
+                    child: IconButton(
+                      tooltip: 'تب‌ها',
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(builder: (_) => const TabsPage()),
+                      ),
+                      icon: const Icon(Icons.crop_square_rounded),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'منو',
+                    onPressed: () => _showHomeMenu(context),
+                    icon: const Icon(Icons.menu_rounded),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -198,7 +219,6 @@ class HomePage extends ConsumerWidget {
   Future<void> _showHomeMenu(BuildContext context) async {
     await showModalBottomSheet<void>(
       context: context,
-      showDragHandle: true,
       builder: (sheetContext) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
@@ -318,19 +338,19 @@ class _RadMark extends StatelessWidget {
     return Column(
       children: [
         Container(
-          width: 68,
-          height: 68,
+          width: 70,
+          height: 70,
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [scheme.primary, scheme.primary.withValues(alpha: .72)],
+              colors: [scheme.primary, scheme.primary.withValues(alpha: .70)],
             ),
-            borderRadius: BorderRadius.circular(22),
+            borderRadius: BorderRadius.circular(23),
             boxShadow: [
               BoxShadow(
                 color: scheme.primary.withValues(alpha: .18),
-                blurRadius: 28,
+                blurRadius: 30,
                 offset: const Offset(0, 12),
               ),
             ],
@@ -340,7 +360,7 @@ class _RadMark extends StatelessWidget {
             'R',
             style: TextStyle(
               color: Colors.white,
-              fontSize: 37,
+              fontSize: 38,
               height: 1,
               fontWeight: FontWeight.w800,
               letterSpacing: -2,
@@ -377,22 +397,29 @@ class _HomeAction extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(22),
+      borderRadius: BorderRadius.circular(20),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 7),
         child: Column(
           children: [
             Container(
               width: 46,
               height: 46,
               decoration: BoxDecoration(
-                color: scheme.surfaceContainerHighest.withValues(alpha: .58),
+                color: scheme.surfaceContainerHighest.withValues(alpha: .60),
                 shape: BoxShape.circle,
+                border: Border.all(
+                  color: scheme.outlineVariant.withValues(alpha: .35),
+                ),
               ),
               child: Icon(icon, size: 21),
             ),
             const SizedBox(height: 8),
-            Text(label, textDirection: TextDirection.rtl),
+            Text(
+              label,
+              textDirection: TextDirection.rtl,
+              style: Theme.of(context).textTheme.labelMedium,
+            ),
           ],
         ),
       ),
