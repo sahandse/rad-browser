@@ -8,6 +8,8 @@ class IranSite {
     required this.verified,
     required this.internalNetwork,
     required this.priority,
+    this.description = '',
+    this.features = const [],
   });
 
   final String id;
@@ -18,6 +20,8 @@ class IranSite {
   final bool verified;
   final bool internalNetwork;
   final int priority;
+  final String description;
+  final List<String> features;
 
   factory IranSite.fromJson(Map<String, Object?> json) {
     return IranSite(
@@ -31,6 +35,10 @@ class IranSite {
       verified: json['verified'] as bool? ?? false,
       internalNetwork: json['internalNetwork'] as bool? ?? false,
       priority: json['priority'] as int? ?? 0,
+      description: json['description'] as String? ?? '',
+      features: (json['features'] as List<Object?>? ?? const [])
+          .whereType<String>()
+          .toList(growable: false),
     );
   }
 }
