@@ -11,11 +11,13 @@ import '../../../history/presentation/pages/history_page.dart';
 import '../../../iran_directory/presentation/pages/iran_directory_page.dart';
 import '../../../network/domain/network_mode.dart';
 import '../../../network/presentation/network_providers.dart';
+import '../../../offline/presentation/pages/offline_pages_page.dart';
 import '../../../settings/domain/app_settings.dart';
 import '../../../settings/presentation/controllers/settings_controller.dart';
 import '../../../settings/presentation/pages/settings_page.dart';
 import '../widgets/internal_network_card.dart';
 import '../widgets/network_status_chip.dart';
+import '../widgets/offline_mode_card.dart';
 import '../widgets/rad_search_bar.dart';
 
 class HomePage extends ConsumerWidget {
@@ -51,6 +53,12 @@ class HomePage extends ConsumerWidget {
     );
   }
 
+  void _openOfflinePages(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (_) => const OfflinePagesPage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
@@ -58,6 +66,7 @@ class HomePage extends ConsumerWidget {
     final network = ref.watch(networkModeProvider);
     final mode = network.valueOrNull;
     final internalOnly = mode == NetworkMode.internalOnly;
+    final offline = mode == NetworkMode.offline;
     final tabCount = ref.watch(browserTabsProvider).length;
 
     return Scaffold(
@@ -131,6 +140,18 @@ class HomePage extends ConsumerWidget {
                       onOpenDirectory: () => _openIranDirectory(context),
                     ),
                   ],
+                  if (offline) ...[
+                    const SizedBox(height: 16),
+                    OfflineModeCard(
+                      onOpenOfflinePages: () => _openOfflinePages(context),
+                      onOpenBookmarks: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const BookmarksPage(),
+                        ),
+                      ),
+                      onOpenIranDirectory: () => _openIranDirectory(context),
+                    ),
+                  ],
                   const SizedBox(height: 26),
                   Wrap(
                     alignment: WrapAlignment.center,
@@ -141,6 +162,11 @@ class HomePage extends ConsumerWidget {
                         icon: Icons.language_rounded,
                         label: 'ایران وب',
                         onTap: () => _openIranDirectory(context),
+                      ),
+                      _HomeAction(
+                        icon: Icons.offline_pin_outlined,
+                        label: 'آفلاین',
+                        onTap: () => _openOfflinePages(context),
                       ),
                       _HomeAction(
                         icon: Icons.star_border_rounded,
@@ -256,6 +282,14 @@ class HomePage extends ConsumerWidget {
                 onTap: () {
                   Navigator.pop(sheetContext);
                   _openIranDirectory(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.offline_pin_outlined),
+                title: const Text('مطالعه آفلاین'),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  _openOfflinePages(context);
                 },
               ),
               ListTile(
