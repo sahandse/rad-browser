@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/utils/url_utils.dart';
 import '../../../bookmarks/presentation/controllers/bookmarks_controller.dart';
 import '../../../bookmarks/presentation/pages/bookmarks_page.dart';
+import '../../../downloads/presentation/controllers/downloads_controller.dart';
+import '../../../downloads/presentation/pages/downloads_page.dart';
 import '../../../history/presentation/controllers/history_controller.dart';
 import '../../../history/presentation/pages/history_page.dart';
 import '../../../network/domain/network_mode.dart';
@@ -106,6 +108,33 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
   void _openTabs() {
     Navigator.of(context).push(
       MaterialPageRoute<void>(builder: (_) => const TabsPage()),
+    );
+  }
+
+  void _openDownloads() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (_) => const DownloadsPage()),
+    );
+  }
+
+  Future<void> _handleDownload(DownloadStartRequest request) async {
+    final uri = Uri.tryParse(request.url.toString());
+    if (uri == null || (uri.scheme != 'http' && uri.scheme != 'https')) return;
+
+    await ref.read(downloadsProvider.notifier).start(
+          uri,
+          suggestedFileName: request.suggestedFilename,
+        );
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('دانلود پردازش شد'),
+        action: SnackBarAction(
+          label: 'دانلودها',
+          onPressed: _openDownloads,
+        ),
+      ),
     );
   }
 
@@ -232,6 +261,7 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
                         builtInZoomControls: false,
                         displayZoomControls: false,
                         useShouldOverrideUrlLoading: true,
+                        useOnDownloadStart: true,
                         mediaPlaybackRequiresUserGesture: true,
                         allowsBackForwardNavigationGestures: true,
                       ),
@@ -240,6 +270,9 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
                       },
                       shouldOverrideUrlLoading: (controller, action) async {
                         return NavigationActionPolicy.ALLOW;
+                      },
+                      onDownloadStartRequest: (controller, request) async {
+                        await _handleDownload(request);
                       },
                       onLoadStart: (controller, url) {
                         if (url == null) return;
@@ -447,6 +480,14 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
                       builder: (_) => const HistoryPage(),
                     ),
                   );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.download_rounded),
+                title: const Text('دانلودها'),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  _openDownloads();
                 },
               ),
               ListTile(
