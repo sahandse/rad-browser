@@ -1,0 +1,22 @@
+{
+  "name": "راد — RAD Browser",
+  "short_name": "راد",
+  "description": "مرورگر مینیمال فارسی با ایران‌وب، حالت شبکه داخلی، حریم خصوصی و مطالعه آفلاین.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#FFFFFF",
+  "theme_color": "#1565C0",
+  "lang": "fa",
+  "dir": "rtl",
+  "categories": ["utilities", "productivity"],
+  "icons": [
+    {
+      "src": "icons/rad.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
