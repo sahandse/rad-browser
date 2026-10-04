@@ -22,34 +22,12 @@ class RadTheme {
       brightness: Brightness.light,
       surface: Colors.white,
     );
-
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: scheme,
-      scaffoldBackgroundColor: Colors.white,
-      visualDensity: compact ? VisualDensity.compact : VisualDensity.standard,
-      appBarTheme: const AppBarTheme(
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        backgroundColor: Colors.transparent,
-        foregroundColor: RadColors.text,
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: RadColors.surface,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(28),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(28),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(28),
-          borderSide: const BorderSide(color: RadColors.primary, width: 1.4),
-        ),
-      ),
+    return _base(
+      scheme: scheme,
+      scaffold: Colors.white,
+      inputFill: RadColors.surface,
+      compact: compact,
+      dark: false,
     );
   }
 
@@ -59,20 +37,45 @@ class RadTheme {
       brightness: Brightness.dark,
       surface: RadColors.surfaceDark,
     );
+    return _base(
+      scheme: scheme,
+      scaffold: const Color(0xFF101114),
+      inputFill: const Color(0xFF202226),
+      compact: compact,
+      dark: true,
+    );
+  }
+
+  static ThemeData _base({
+    required ColorScheme scheme,
+    required Color scaffold,
+    required Color inputFill,
+    required bool compact,
+    required bool dark,
+  }) {
+    final focusColor = dark ? const Color(0xFF8AB4F8) : RadColors.primary;
 
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
-      scaffoldBackgroundColor: const Color(0xFF101114),
+      scaffoldBackgroundColor: scaffold,
       visualDensity: compact ? VisualDensity.compact : VisualDensity.standard,
-      appBarTheme: const AppBarTheme(
+      splashFactory: InkSparkle.splashFactory,
+      appBarTheme: AppBarTheme(
         elevation: 0,
         scrolledUnderElevation: 0,
         backgroundColor: Colors.transparent,
+        foregroundColor: scheme.onSurface,
+        centerTitle: false,
+        titleTextStyle: TextStyle(
+          color: scheme.onSurface,
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+        ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: const Color(0xFF202226),
+        fillColor: inputFill,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(28),
           borderSide: BorderSide.none,
@@ -83,7 +86,58 @@ class RadTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(28),
-          borderSide: const BorderSide(color: Color(0xFF8AB4F8), width: 1.4),
+          borderSide: BorderSide(color: focusColor, width: 1.4),
+        ),
+      ),
+      searchBarTheme: SearchBarThemeData(
+        elevation: const WidgetStatePropertyAll(0),
+        backgroundColor: WidgetStatePropertyAll(scheme.surfaceContainerLow),
+        shape: WidgetStatePropertyAll(
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
+        ),
+        padding: const WidgetStatePropertyAll(
+          EdgeInsets.symmetric(horizontal: 16),
+        ),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: scheme.surface,
+        surfaceTintColor: Colors.transparent,
+        showDragHandle: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: scheme.surface,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: scheme.inverseSurface,
+        contentTextStyle: TextStyle(color: scheme.onInverseSurface),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      ),
+      dividerTheme: DividerThemeData(
+        color: scheme.outlineVariant.withValues(alpha: .55),
+        space: 1,
+        thickness: .7,
+      ),
+      listTileTheme: ListTileThemeData(
+        iconColor: scheme.onSurfaceVariant,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
         ),
       ),
     );
