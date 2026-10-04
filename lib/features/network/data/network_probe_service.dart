@@ -9,17 +9,27 @@ class NetworkProbeService {
   NetworkProbeService({
     Connectivity? connectivity,
     http.Client? client,
-    Uri? internalProbe,
-    Uri? globalProbe,
+    List<Uri>? internalProbes,
+    List<Uri>? globalProbes,
   })  : _connectivity = connectivity ?? Connectivity(),
         _client = client ?? http.Client(),
-        internalProbe = internalProbe ?? Uri.https('www.nic.ir'),
-        globalProbe = globalProbe ?? Uri.https('www.google.com', '/generate_204');
+        internalProbes = internalProbes ??
+            [
+              Uri.https('www.nic.ir'),
+              Uri.https('zarebin.ir'),
+              Uri.https('141.ir'),
+            ],
+        globalProbes = globalProbes ??
+            [
+              Uri.https('www.google.com', '/generate_204'),
+              Uri.https('www.cloudflare.com', '/cdn-cgi/trace'),
+              Uri.https('www.bing.com'),
+            ];
 
   final Connectivity _connectivity;
   final http.Client _client;
-  final Uri internalProbe;
-  final Uri globalProbe;
+  final List<Uri> internalProbes;
+  final List<Uri> globalProbes;
 
   static const _probeTimeout = Duration(seconds: 4);
 
@@ -31,8 +41,8 @@ class NetworkProbeService {
     }
 
     final results = await Future.wait<bool>([
-      _isReachable(internalProbe),
-      _isReachable(globalProbe),
+      _anyReachable(internalProbes),
+      _anyReachable(globalProbes),
     ]);
 
     final internalReachable = results[0];
@@ -51,6 +61,11 @@ class NetworkProbeService {
   }
 
   Future<bool> canReach(Uri uri) => _isReachable(uri);
+
+  Future<bool> _anyReachable(List<Uri> probes) async {
+    final results = await Future.wait(probes.map(_isReachable));
+    return results.any((value) => value);
+  }
 
   Future<bool> _isReachable(Uri uri) async {
     try {
