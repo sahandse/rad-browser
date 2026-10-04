@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../domain/site_permission.dart';
 
@@ -87,7 +89,26 @@ Future<SitePermissionPromptResult> showSitePermissionPrompt(
       );
     },
   );
-  return result ?? SitePermissionPromptResult.block;
+
+  final decision = result ?? SitePermissionPromptResult.block;
+  if (decision == SitePermissionPromptResult.block) return decision;
+
+  final deviceAllowed = await _ensureDevicePermission(kind);
+  return deviceAllowed ? decision : SitePermissionPromptResult.block;
+}
+
+Future<bool> _ensureDevicePermission(SitePermissionKind kind) async {
+  if (kIsWeb) return true;
+
+  final permission = switch (kind) {
+    SitePermissionKind.camera => Permission.camera,
+    SitePermissionKind.microphone => Permission.microphone,
+    SitePermissionKind.location => Permission.locationWhenInUse,
+    SitePermissionKind.notifications => Permission.notification,
+  };
+
+  final status = await permission.request();
+  return status.isGranted || status.isLimited;
 }
 
 IconData _iconFor(SitePermissionKind kind) => switch (kind) {
