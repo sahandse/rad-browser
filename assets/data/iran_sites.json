@@ -1,5 +1,56 @@
 {
   "version": 1,
-  "updatedAt": null,
-  "sites": []
+  "updatedAt": "2026-10-04T04:36:00Z",
+  "sites": [
+    {
+      "id": "cbi",
+      "name": "بانک مرکزی جمهوری اسلامی ایران",
+      "url": "https://www.cbi.ir/",
+      "category": "banking",
+      "keywords": ["بانک مرکزی", "ارز", "نرخ ارز", "بانک", "پرداخت"],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 100
+    },
+    {
+      "id": "irna",
+      "name": "خبرگزاری جمهوری اسلامی - ایرنا",
+      "url": "https://www.irna.ir/",
+      "category": "news",
+      "keywords": ["ایرنا", "خبر", "خبرگزاری", "اخبار ایران"],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 90
+    },
+    {
+      "id": "isna",
+      "name": "خبرگزاری ایسنا",
+      "url": "https://www.isna.ir/",
+      "category": "news",
+      "keywords": ["ایسنا", "خبر", "خبرگزاری", "دانشجویان"],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 88
+    },
+    {
+      "id": "ut",
+      "name": "دانشگاه تهران",
+      "url": "https://ut.ac.ir/",
+      "category": "education",
+      "keywords": ["دانشگاه تهران", "دانشگاه", "آموزش", "پژوهش"],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 80
+    },
+    {
+      "id": "road-141",
+      "name": "سامانه ۱۴۱",
+      "url": "https://141.ir/",
+      "category": "transport",
+      "keywords": ["۱۴۱", "141", "راه", "جاده", "ترافیک", "وضعیت راه"],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 85
+    }
+  ]
 }
