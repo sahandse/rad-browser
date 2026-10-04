@@ -34,15 +34,9 @@ class SettingsPage extends ConsumerWidget {
                 leading: const Icon(Icons.density_medium_rounded),
                 title: const Text('تراکم رابط'),
                 subtitle: Text(
-                  settings.uiDensity == RadUiDensity.compact
-                      ? 'فشرده'
-                      : 'راحت',
+                  settings.uiDensity == RadUiDensity.compact ? 'فشرده' : 'راحت',
                 ),
-                onTap: () => _showDensityPicker(
-                  context,
-                  ref,
-                  settings.uiDensity,
-                ),
+                onTap: () => _showDensityPicker(context, ref, settings.uiDensity),
               ),
             ],
           ),
@@ -125,11 +119,10 @@ class SettingsPage extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: RadThemePreference.values
               .map(
-                (value) => RadioListTile<RadThemePreference>(
-                  value: value,
-                  groupValue: selected,
-                  title: Text(_themeLabel(value)),
-                  onChanged: (value) => Navigator.pop(context, value),
+                (value) => _ChoiceTile(
+                  title: _themeLabel(value),
+                  selected: value == selected,
+                  onTap: () => Navigator.pop(context, value),
                 ),
               )
               .toList(growable: false),
@@ -153,19 +146,17 @@ class SettingsPage extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            RadioListTile<RadUiDensity>(
-              value: RadUiDensity.comfortable,
-              groupValue: selected,
-              title: const Text('راحت'),
-              subtitle: const Text('فاصله بیشتر برای استفاده لمسی'),
-              onChanged: (value) => Navigator.pop(context, value),
+            _ChoiceTile(
+              title: 'راحت',
+              subtitle: 'فاصله بیشتر برای استفاده لمسی',
+              selected: selected == RadUiDensity.comfortable,
+              onTap: () => Navigator.pop(context, RadUiDensity.comfortable),
             ),
-            RadioListTile<RadUiDensity>(
-              value: RadUiDensity.compact,
-              groupValue: selected,
-              title: const Text('فشرده'),
-              subtitle: const Text('فضای بیشتر برای محتوای وب'),
-              onChanged: (value) => Navigator.pop(context, value),
+            _ChoiceTile(
+              title: 'فشرده',
+              subtitle: 'فضای بیشتر برای محتوای وب',
+              selected: selected == RadUiDensity.compact,
+              onTap: () => Navigator.pop(context, RadUiDensity.compact),
             ),
           ],
         ),
@@ -189,11 +180,10 @@ class SettingsPage extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: RadSearchEngine.values
               .map(
-                (value) => RadioListTile<RadSearchEngine>(
-                  value: value,
-                  groupValue: selected,
-                  title: Text(value.title),
-                  onChanged: (value) => Navigator.pop(context, value),
+                (value) => _ChoiceTile(
+                  title: value.title,
+                  selected: value == selected,
+                  onTap: () => Navigator.pop(context, value),
                 ),
               )
               .toList(growable: false),
@@ -229,6 +219,31 @@ class SettingsPage extends ConsumerWidget {
       ),
     );
     if (accepted == true) await action();
+  }
+}
+
+class _ChoiceTile extends StatelessWidget {
+  const _ChoiceTile({
+    required this.title,
+    required this.selected,
+    required this.onTap,
+    this.subtitle,
+  });
+
+  final String title;
+  final String? subtitle;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: Text(title),
+      subtitle: subtitle == null ? null : Text(subtitle!),
+      trailing: selected ? const Icon(Icons.check_rounded) : null,
+      selected: selected,
+      onTap: onTap,
+    );
   }
 }
 
