@@ -15,6 +15,10 @@ import '../../../network/domain/network_mode.dart';
 import '../../../network/presentation/network_providers.dart';
 import '../../../offline/presentation/controllers/offline_pages_controller.dart';
 import '../../../offline/presentation/pages/offline_pages_page.dart';
+import '../../../permissions/domain/site_permission.dart';
+import '../../../permissions/presentation/controllers/site_permissions_controller.dart';
+import '../../../permissions/presentation/pages/site_permissions_page.dart';
+import '../../../permissions/presentation/widgets/site_permission_prompt.dart';
 import '../../../privacy/domain/tracker_blocker.dart';
 import '../../../reader/presentation/pages/reader_page.dart';
 import '../../../settings/domain/app_settings.dart';
@@ -345,22 +349,192 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
     }
   }
 
+  Future<bool> _askPermission(
+    String host,
+    SitePermissionKind kind,
+  ) async {
+    final controller = ref.read(sitePermissionsProvider.notifier);
+    final saved = controller.decision(host, kind);
+    if (saved == SitePermissionDecision.allow) return true;
+    if (saved == SitePermissionDecision.block) return false;
+    if (!mounted) return false;
+    final result = await showSitePermissionPrompt(
+      context,
+      host: host,
+      kind: kind,
+    );
+    switch (result) {
+      case SitePermissionPromptResult.allowOnce:
+        return true;
+      case SitePermissionPromptResult.allowAlways:
+        await controller.setDecision(host, kind, SitePermissionDecision.allow);
+        return true;
+      case SitePermissionPromptResult.block:
+        await controller.setDecision(host, kind, SitePermissionDecision.block);
+        return false;
+    }
+  }
+
+  Future<PermissionResponse?> _handlePermissionRequest(
+    PermissionRequest request,
+  ) async {
+    final host = Uri.tryParse(request.origin.toString())?.host ?? _currentUri.host;
+    final granted = <PermissionResourceType>[];
+    for (final resource in request.resources) {
+      var allowed = false;
+      if (resource == PermissionResourceType.CAMERA_AND_MICROPHONE) {
+        final camera = await _askPermission(host, SitePermissionKind.camera);
+        final mic = await _askPermission(host, SitePermissionKind.microphone);
+        allowed = camera && mic;
+      } else {
+        final kind = _permissionKind(resource);
+        if (kind == null) continue;
+        allowed = await _askPermission(host, kind);
+      }
+      if (allowed) granted.add(resource);
+    }
+    if (granted.isEmpty) {
+      return PermissionResponse(
+        resources: request.resources,
+        action: PermissionResponseAction.DENY,
+      );
+    }
+    return PermissionResponse(
+      resources: granted,
+      action: PermissionResponseAction.GRANT,
+    );
+  }
+
+  SitePermissionKind? _permissionKind(PermissionResourceType resource) {
+    if (resource == PermissionResourceType.CAMERA) {
+      return SitePermissionKind.camera;
+    }
+    if (resource == PermissionResourceType.MICROPHONE) {
+      return SitePermissionKind.microphone;
+    }
+    if (resource == PermissionResourceType.GEOLOCATION) {
+      return SitePermissionKind.location;
+    }
+    if (resource == PermissionResourceType.NOTIFICATIONS) {
+      return SitePermissionKind.notifications;
+    }
+    return null;
+  }
+
+  Future<GeolocationPermissionShowPromptResponse?> _handleGeolocation(
+    String origin,
+  ) async {
+    final host = Uri.tryParse(origin)?.host ?? _currentUri.host;
+    final saved = ref
+        .read(sitePermissionsProvider.notifier)
+        .decision(host, SitePermissionKind.location);
+    if (saved == SitePermissionDecision.allow) {
+      return GeolocationPermissionShowPromptResponse(
+        origin: origin,
+        allow: true,
+        retain: true,
+      );
+    }
+    if (saved == SitePermissionDecision.block) {
+      return GeolocationPermissionShowPromptResponse(
+        origin: origin,
+        allow: false,
+        retain: true,
+      );
+    }
+    if (!mounted) return null;
+    final result = await showSitePermissionPrompt(
+      context,
+      host: host,
+      kind: SitePermissionKind.location,
+    );
+    switch (result) {
+      case SitePermissionPromptResult.allowOnce:
+        return GeolocationPermissionShowPromptResponse(
+          origin: origin,
+          allow: true,
+          retain: false,
+        );
+      case SitePermissionPromptResult.allowAlways:
+        await ref.read(sitePermissionsProvider.notifier).setDecision(
+              host,
+              SitePermissionKind.location,
+              SitePermissionDecision.allow,
+            );
+        return GeolocationPermissionShowPromptResponse(
+          origin: origin,
+          allow: true,
+          retain: true,
+        );
+      case SitePermissionPromptResult.block:
+        await ref.read(sitePermissionsProvider.notifier).setDecision(
+              host,
+              SitePermissionKind.location,
+              SitePermissionDecision.block,
+            );
+        return GeolocationPermissionShowPromptResponse(
+          origin: origin,
+          allow: false,
+          retain: true,
+        );
+    }
+  }
+
+  Future<void> _clearCurrentSiteData() async {
+    final controller = _webViewController;
+    final url = WebUri(_currentUri.toString());
+    try {
+      await CookieManager.instance().deleteCookies(
+        url: url,
+        webViewController: controller,
+      );
+    } on Object {
+      // Continue clearing storage even when a platform cannot clear cookies.
+    }
+    if (controller != null) {
+      await controller.evaluateJavascript(
+        source: '''
+          (() => {
+            try { localStorage.clear(); } catch (_) {}
+            try { sessionStorage.clear(); } catch (_) {}
+            try {
+              if (window.caches) {
+                caches.keys().then(keys => keys.forEach(key => caches.delete(key)));
+              }
+            } catch (_) {}
+          })();
+        ''',
+      );
+    }
+    await ref.read(sitePermissionsProvider.notifier).clearHost(_currentUri.host);
+    if (controller != null) await controller.reload();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('داده‌های همین سایت پاک شد')),
+    );
+  }
+
   Future<void> _showSiteInfo(BuildContext context) async {
     final settings = ref.read(settingsProvider);
     var cookieCount = 0;
     try {
       final cookies = await CookieManager.instance().getCookies(
         url: WebUri(_currentUri.toString()),
+        webViewController: _webViewController,
       );
       cookieCount = cookies.length;
     } on Object {
       cookieCount = 0;
     }
+    final permissionCount = ref
+        .read(sitePermissionsProvider.notifier)
+        .forHost(_currentUri.host)
+        .length;
     if (!context.mounted) return;
     await showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
-      builder: (_) => SafeArea(
+      builder: (sheetContext) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 22),
           child: Column(
@@ -398,12 +572,70 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
                 ],
               ),
               const SizedBox(height: 18),
-              _InfoRow(label: 'دامنه ایران', value: UrlUtils.isIrDomain(_currentUri) ? 'بله' : 'خیر'),
+              _InfoRow(
+                label: 'دامنه ایران',
+                value: UrlUtils.isIrDomain(_currentUri) ? 'بله' : 'خیر',
+              ),
               _InfoRow(label: 'کوکی‌های این سایت', value: '$cookieCount'),
-              _InfoRow(label: 'محافظت رهگیری', value: settings.trackingProtection.title),
-              _InfoRow(label: 'هدایت رهگیر مسدودشده', value: '$_blockedTrackerNavigations'),
-              _InfoRow(label: 'HTTPS-first', value: settings.httpsFirst ? 'فعال' : 'خاموش'),
-              _InfoRow(label: 'حالت دسکتاپ', value: _desktopMode ? 'فعال' : 'خاموش'),
+              _InfoRow(label: 'مجوزهای ذخیره‌شده', value: '$permissionCount'),
+              _InfoRow(
+                label: 'محافظت رهگیری',
+                value: settings.trackingProtection.title,
+              ),
+              _InfoRow(
+                label: 'هدایت رهگیر مسدودشده',
+                value: '$_blockedTrackerNavigations',
+              ),
+              _InfoRow(
+                label: 'HTTPS-first',
+                value: settings.httpsFirst ? 'فعال' : 'خاموش',
+              ),
+              _InfoRow(
+                label: 'حالت دسکتاپ',
+                value: _desktopMode ? 'فعال' : 'خاموش',
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: () {
+                  Navigator.pop(sheetContext);
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const SitePermissionsPage(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.admin_panel_settings_outlined),
+                label: const Text('مدیریت مجوزهای سایت‌ها'),
+              ),
+              const SizedBox(height: 8),
+              TextButton.icon(
+                onPressed: () async {
+                  Navigator.pop(sheetContext);
+                  final accepted = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('داده‌های این سایت پاک شود؟'),
+                      content: Text(
+                        'Cookie، Storage و تصمیم‌های مجوز ${_currentUri.host} پاک می‌شوند. داده سایت‌های دیگر باقی می‌ماند.',
+                        textDirection: TextDirection.rtl,
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const Text('انصراف'),
+                        ),
+                        FilledButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: const Text('پاک کن'),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (accepted == true) await _clearCurrentSiteData();
+                },
+                icon: const Icon(Icons.delete_outline_rounded),
+                label: const Text('پاک‌کردن داده‌های همین سایت'),
+              ),
             ],
           ),
         ),
@@ -467,7 +699,9 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
                                       ? Icons.lock_rounded
                                       : Icons.warning_amber_rounded,
                               size: 18,
-                              color: isIr ? scheme.primary : scheme.onSurfaceVariant,
+                              color: isIr
+                                  ? scheme.primary
+                                  : scheme.onSurfaceVariant,
                             ),
                           ),
                           suffixIcon: IconButton(
@@ -481,16 +715,21 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
                               }
                             },
                             icon: Icon(
-                              _isLoading ? Icons.close_rounded : Icons.refresh_rounded,
+                              _isLoading
+                                  ? Icons.close_rounded
+                                  : Icons.refresh_rounded,
                               size: 20,
                             ),
                           ),
                           border: InputBorder.none,
                           enabledBorder: InputBorder.none,
                           focusedBorder: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                          contentPadding:
+                              const EdgeInsets.symmetric(vertical: 14),
                         ),
-                        style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ),
@@ -529,13 +768,16 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
                             await _findInteractionController.clearMatches();
                             return;
                           }
-                          await _findInteractionController.findAll(find: value.trim());
+                          await _findInteractionController.findAll(
+                            find: value.trim(),
+                          );
                         },
                       ),
                     ),
                     IconButton(
                       tooltip: 'قبلی',
-                      onPressed: () => _findInteractionController.findNext(forward: false),
+                      onPressed: () =>
+                          _findInteractionController.findNext(forward: false),
                       icon: const Icon(Icons.keyboard_arrow_up_rounded),
                     ),
                     IconButton(
@@ -555,14 +797,18 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
               duration: const Duration(milliseconds: 180),
               height: _progress >= 1 ? 0 : 2,
               alignment: Alignment.centerLeft,
-              child: LinearProgressIndicator(value: _progress == 0 ? null : _progress),
+              child: LinearProgressIndicator(
+                value: _progress == 0 ? null : _progress,
+              ),
             ),
             Expanded(
               child: Stack(
                 children: [
                   Positioned.fill(
                     child: InAppWebView(
-                      initialUrlRequest: URLRequest(url: WebUri(_currentUri.toString())),
+                      initialUrlRequest: URLRequest(
+                        url: WebUri(_currentUri.toString()),
+                      ),
                       findInteractionController: _findInteractionController,
                       initialSettings: InAppWebViewSettings(
                         javaScriptEnabled: true,
@@ -575,7 +821,8 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
                         mediaPlaybackRequiresUserGesture: settings.dataSaver,
                         allowsBackForwardNavigationGestures: true,
                         supportMultipleWindows: false,
-                        javaScriptCanOpenWindowsAutomatically: !settings.blockPopups,
+                        javaScriptCanOpenWindowsAutomatically:
+                            !settings.blockPopups,
                         preferredContentMode: _desktopMode
                             ? UserPreferredContentMode.DESKTOP
                             : UserPreferredContentMode.MOBILE,
@@ -587,22 +834,31 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
                       shouldOverrideUrlLoading: (controller, action) async {
                         final raw = action.request.url?.toString();
                         final uri = raw == null ? null : Uri.tryParse(raw);
-                        if (uri != null && blocker.shouldBlock(uri, _currentUri)) {
+                        if (uri != null &&
+                            blocker.shouldBlock(uri, _currentUri)) {
                           if (mounted) {
                             setState(() => _blockedTrackerNavigations++);
                           }
                           return NavigationActionPolicy.CANCEL;
                         }
-                        if (uri != null && settings.httpsFirst && uri.scheme == 'http') {
+                        if (uri != null &&
+                            settings.httpsFirst &&
+                            uri.scheme == 'http') {
                           await controller.loadUrl(
                             urlRequest: URLRequest(
-                              url: WebUri(uri.replace(scheme: 'https').toString()),
+                              url: WebUri(
+                                uri.replace(scheme: 'https').toString(),
+                              ),
                             ),
                           );
                           return NavigationActionPolicy.CANCEL;
                         }
                         return NavigationActionPolicy.ALLOW;
                       },
+                      onPermissionRequest: (controller, request) =>
+                          _handlePermissionRequest(request),
+                      onGeolocationPermissionsShowPrompt:
+                          (controller, origin) => _handleGeolocation(origin),
                       onDownloadStarting: (controller, request) async {
                         await _handleDownload(request);
                         return null;
@@ -662,7 +918,8 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
                               progress: 1,
                             );
                         if (uri != null) {
-                          final title = _currentTitle.isEmpty ? uri.host : _currentTitle;
+                          final title =
+                              _currentTitle.isEmpty ? uri.host : _currentTitle;
                           await ref.read(historyProvider.notifier).record(
                                 url: uri,
                                 title: title,
@@ -694,7 +951,9 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
                           setState(() => _mainFrameFailed = false);
                           await _webViewController?.reload();
                         },
-                        onHome: () => Navigator.of(context).popUntil((route) => route.isFirst),
+                        onHome: () => Navigator.of(context).popUntil(
+                          (route) => route.isFirst,
+                        ),
                       ),
                     ),
                 ],
@@ -715,7 +974,9 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
               decoration: BoxDecoration(
                 color: scheme.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(30),
-                border: Border.all(color: scheme.outlineVariant.withValues(alpha: .5)),
+                border: Border.all(
+                  color: scheme.outlineVariant.withValues(alpha: .5),
+                ),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: .05),
@@ -729,7 +990,9 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
                 children: [
                   IconButton(
                     tooltip: 'عقب',
-                    onPressed: _canGoBack ? _goBack : () => Navigator.maybePop(context),
+                    onPressed: _canGoBack
+                        ? _goBack
+                        : () => Navigator.maybePop(context),
                     icon: const Icon(Icons.arrow_back_rounded),
                   ),
                   IconButton(
@@ -739,7 +1002,9 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
                   ),
                   IconButton(
                     tooltip: 'خانه',
-                    onPressed: () => Navigator.of(context).popUntil((route) => route.isFirst),
+                    onPressed: () => Navigator.of(context).popUntil(
+                      (route) => route.isFirst,
+                    ),
                     icon: const Icon(Icons.home_outlined),
                   ),
                   Badge(
@@ -766,7 +1031,8 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
 
   Future<void> _showBrowserMenu(BuildContext context) async {
     final scheme = Theme.of(context).colorScheme;
-    final isBookmarked = ref.read(bookmarksProvider.notifier).contains(_currentUri);
+    final isBookmarked =
+        ref.read(bookmarksProvider.notifier).contains(_currentUri);
     await showModalBottomSheet<void>(
       context: context,
       backgroundColor: scheme.surface,
@@ -774,7 +1040,9 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
       showDragHandle: true,
       builder: (sheetContext) => SafeArea(
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * .78),
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.sizeOf(context).height * .78,
+          ),
           child: ListView(
             shrinkWrap: true,
             padding: const EdgeInsets.fromLTRB(14, 0, 14, 22),
@@ -799,8 +1067,14 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
                 },
               ),
               ListTile(
-                leading: Icon(_desktopMode ? Icons.phone_android_rounded : Icons.desktop_windows_rounded),
-                title: Text(_desktopMode ? 'نمایش موبایل' : 'سایت دسکتاپ'),
+                leading: Icon(
+                  _desktopMode
+                      ? Icons.phone_android_rounded
+                      : Icons.desktop_windows_rounded,
+                ),
+                title: Text(
+                  _desktopMode ? 'نمایش موبایل' : 'سایت دسکتاپ',
+                ),
                 onTap: () async {
                   Navigator.pop(sheetContext);
                   await _toggleDesktopMode();
@@ -832,11 +1106,19 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
               ),
               const Divider(),
               ListTile(
-                leading: Icon(isBookmarked ? Icons.star_rounded : Icons.star_border_rounded),
-                title: Text(isBookmarked ? 'حذف از نشانک‌ها' : 'افزودن به نشانک‌ها'),
+                leading: Icon(
+                  isBookmarked ? Icons.star_rounded : Icons.star_border_rounded,
+                ),
+                title: Text(
+                  isBookmarked ? 'حذف از نشانک‌ها' : 'افزودن به نشانک‌ها',
+                ),
                 onTap: () async {
-                  final title = _currentTitle.isEmpty ? _currentUri.host : _currentTitle;
-                  await ref.read(bookmarksProvider.notifier).toggle(url: _currentUri, title: title);
+                  final title =
+                      _currentTitle.isEmpty ? _currentUri.host : _currentTitle;
+                  await ref.read(bookmarksProvider.notifier).toggle(
+                        url: _currentUri,
+                        title: title,
+                      );
                   if (sheetContext.mounted) Navigator.pop(sheetContext);
                 },
               ),
@@ -864,7 +1146,11 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
                 title: const Text('نشانک‌ها'),
                 onTap: () {
                   Navigator.pop(sheetContext);
-                  Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const BookmarksPage()));
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const BookmarksPage(),
+                    ),
+                  );
                 },
               ),
               ListTile(
@@ -872,7 +1158,11 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
                 title: const Text('تاریخچه'),
                 onTap: () {
                   Navigator.pop(sheetContext);
-                  Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HistoryPage()));
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const HistoryPage(),
+                    ),
+                  );
                 },
               ),
               ListTile(
@@ -888,7 +1178,11 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
                 title: const Text('تنظیمات'),
                 onTap: () {
                   Navigator.pop(sheetContext);
-                  Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const SettingsPage()));
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const SettingsPage(),
+                    ),
+                  );
                 },
               ),
               const Divider(),
@@ -1016,7 +1310,9 @@ class _BrowserErrorView extends StatelessWidget {
                   title,
                   textAlign: TextAlign.center,
                   textDirection: TextDirection.rtl,
-                  style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
                 const SizedBox(height: 10),
                 Text(
@@ -1032,7 +1328,10 @@ class _BrowserErrorView extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    OutlinedButton(onPressed: onHome, child: const Text('خانه')),
+                    OutlinedButton(
+                      onPressed: onHome,
+                      child: const Text('خانه'),
+                    ),
                     const SizedBox(width: 10),
                     FilledButton.icon(
                       onPressed: onRetry,
