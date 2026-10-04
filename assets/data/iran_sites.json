@@ -1,43 +1,1857 @@
 {
-  "version": 4,
-  "updatedAt": "2026-10-04T05:28:00Z",
+  "version": 5,
+  "updatedAt": "2026-10-04T08:45:00Z",
   "sites": [
-    {"id":"zarebin","name":"جستجوگر ذره‌بین","url":"https://zarebin.ir/","category":"search","keywords":["ذره بین","ذره‌بین","جستجو","جستجوگر ایرانی","موتور جستجو"],"verified":true,"internalNetwork":false,"priority":120},
-    {"id":"mygov","name":"پنجره ملی خدمات دولت هوشمند","url":"https://my.gov.ir/","category":"government","keywords":["دولت من","دولت","خدمات دولت","پنجره ملی","خدمات الکترونیک"],"verified":true,"internalNetwork":false,"priority":118},
-    {"id":"tamin","name":"سازمان تأمین اجتماعی","url":"https://www.tamin.ir/","category":"government","keywords":["تامین اجتماعی","تأمین اجتماعی","بیمه","بازنشستگی","مستمری"],"verified":true,"internalNetwork":false,"priority":116},
-    {"id":"tamin-eservices","name":"خدمات غیرحضوری تأمین اجتماعی","url":"https://eservices.tamin.ir/","category":"government","keywords":["سوابق بیمه","خدمات غیرحضوری","فیش حقوقی","تامین اجتماعی"],"verified":true,"internalNetwork":false,"priority":115},
-    {"id":"cbi","name":"بانک مرکزی جمهوری اسلامی ایران","url":"https://www.cbi.ir/","category":"banking","keywords":["بانک مرکزی","ارز","نرخ ارز","قیمت دلار","بانک","پرداخت"],"verified":true,"internalNetwork":false,"priority":112},
-    {"id":"shaparak","name":"شاپرک","url":"https://www.shaparak.ir/","category":"banking","keywords":["شاپرک","پرداخت","کارت بانکی","درگاه پرداخت"],"verified":true,"internalNetwork":false,"priority":110},
-    {"id":"bmi","name":"بانک ملی ایران","url":"https://www.bmi.ir/","category":"banking","keywords":["بانک ملی","بام","بانکداری اینترنتی","بانک"],"verified":true,"internalNetwork":false,"priority":108},
-    {"id":"bankmellat","name":"بانک ملت","url":"https://www.bankmellat.ir/","category":"banking","keywords":["بانک ملت","به پرداخت","بانکداری اینترنتی","بانک"],"verified":true,"internalNetwork":false,"priority":107},
-    {"id":"tejarat","name":"بانک تجارت","url":"https://www.tejaratbank.ir/","category":"banking","keywords":["بانک تجارت","بانکداری اینترنتی","بانک"],"verified":true,"internalNetwork":false,"priority":106},
-    {"id":"bsi","name":"بانک صادرات ایران","url":"https://www.bsi.ir/","category":"banking","keywords":["بانک صادرات","سپهر","بانکداری اینترنتی","بانک"],"verified":true,"internalNetwork":false,"priority":105},
-    {"id":"mci","name":"همراه اول","url":"https://mci.ir/","category":"operator","keywords":["همراه اول","سیم کارت","اینترنت همراه","قبض","اپراتور"],"verified":true,"internalNetwork":false,"priority":103},
-    {"id":"irancell","name":"ایرانسل","url":"https://irancell.ir/","category":"operator","keywords":["ایرانسل","سیم کارت","اینترنت همراه","اپراتور"],"verified":true,"internalNetwork":false,"priority":102},
-    {"id":"rightel","name":"رایتل","url":"https://www.rightel.ir/","category":"operator","keywords":["رایتل","سیم کارت","اینترنت همراه","اپراتور"],"verified":true,"internalNetwork":false,"priority":101},
-    {"id":"aparat","name":"آپارات","url":"https://www.aparat.com/","category":"video","keywords":["آپارات","ویدیو","فیلم","ویدئو","اشتراک ویدیو"],"verified":true,"internalNetwork":false,"priority":100},
-    {"id":"filmcase","name":"فیلم‌کیس","url":"https://filmcase.ir/","category":"video","description":"پلتفرم ایرانی تماشای رایگان فیلم و سریال با محتوای به‌روز، امتیاز IMDb، دسته‌بندی محتوایی، شبکه‌های زنده و قابلیت نصب روی دستگاه.","features":["تماشای رایگان فیلم و سریال","جدیدترین فیلم‌ها","جدیدترین سریال‌ها","امتیاز IMDb و سال انتشار","دوبله فارسی","انیمیشن","مستند","شبکه ۳","شبکه نسیم","شبکه ورزش","اسپرت ۱","پخش زنده شبکه‌ها","قابل نصب روی دستگاه","وب‌اپ PWA","جستجوی فیلم و سریال"],"keywords":["فیلم کیس","فیلم‌کیس","FilmCase","فیلم","سریال","تماشای آنلاین","تماشای رایگان","دوبله فارسی","انیمیشن","مستند","IMDB","پخش زنده","شبکه تلویزیونی","اپلیکیشن فیلم","PWA"],"verified":true,"internalNetwork":false,"priority":100},
-    {"id":"filimo","name":"فیلیمو","url":"https://www.filimo.com/","category":"video","keywords":["فیلیمو","فیلم","سریال","تماشای آنلاین"],"verified":true,"internalNetwork":false,"priority":99},
-    {"id":"namava","name":"نماوا","url":"https://www.namava.ir/","category":"video","keywords":["نماوا","فیلم","سریال","تماشای آنلاین"],"verified":true,"internalNetwork":false,"priority":98},
-    {"id":"digikala","name":"دیجی‌کالا","url":"https://www.digikala.com/","category":"shopping","keywords":["دیجی کالا","دیجی‌کالا","فروشگاه","خرید","کالا"],"verified":true,"internalNetwork":false,"priority":97},
-    {"id":"noraashop","name":"نورا شاپ","url":"https://noraashop.ir/","category":"shopping","description":"فروشگاه اینترنتی لوازم آرایشی و بهداشتی با دسته‌های آرایش لب، چشم، صورت و ابرو، مراقبت پوست، ابزار آرایشی و بهداشتی، مو، ناخن و اکسسوری.","features":["فروشگاه اینترنتی لوازم آرایشی","آرایش لب","آرایش چشم","آرایش صورت","آرایش ابرو","مراقبت پوست","ابزار آرایشی","ابزار بهداشتی","آرایش و اکسسوری مو","ناخن","رژ لب","ریمل","خط چشم","کانسیلر","کانتور","هایلایتر","آبرسان و ماسک پوست","لیست علاقه‌مندی‌ها","مقایسه محصول","خرید قسطی","رهگیری سفارشات","ورود و ثبت‌نام پیامکی OTP","سبد خرید و تسویه حساب","پرسش‌های متداول","وبلاگ","پرداخت زرین‌پال","زرین‌پلاس","اسنپ‌پی","ترب‌پی","ارسال هوشمند"],"keywords":["نورا شاپ","NoraaShop","فروشگاه آرایشی","لوازم آرایشی","لوازم بهداشتی","مراقبت پوست","رژ لب","ریمل","خط چشم","کانسیلر","کانتور","هایلایتر","آرایش چشم","آرایش صورت","آرایش لب","ابزار آرایشی","خرید قسطی","اسنپ پی","ترب پی","رهگیری سفارش","مقایسه محصول","OTP","خرید آنلاین"],"verified":true,"internalNetwork":false,"priority":97},
-    {"id":"torob","name":"ترب","url":"https://torob.com/","category":"shopping","keywords":["ترب","مقایسه قیمت","خرید","فروشگاه","قیمت کالا"],"verified":true,"internalNetwork":false,"priority":96},
-    {"id":"snapp","name":"اسنپ","url":"https://snapp.ir/","category":"transport","keywords":["اسنپ","تاکسی","سفر","حمل و نقل"],"verified":true,"internalNetwork":false,"priority":95},
-    {"id":"neshan","name":"نشان","url":"https://neshan.org/","category":"map","keywords":["نشان","نقشه","مسیریاب","ترافیک","آدرس"],"verified":true,"internalNetwork":false,"priority":94},
-    {"id":"balad","name":"بلد","url":"https://balad.ir/","category":"map","keywords":["بلد","نقشه","مسیریاب","ترافیک","آدرس"],"verified":true,"internalNetwork":false,"priority":93},
-    {"id":"irna","name":"خبرگزاری جمهوری اسلامی - ایرنا","url":"https://www.irna.ir/","category":"news","keywords":["ایرنا","خبر","خبرگزاری","اخبار ایران"],"verified":true,"internalNetwork":false,"priority":92},
-    {"id":"isna","name":"خبرگزاری ایسنا","url":"https://www.isna.ir/","category":"news","keywords":["ایسنا","خبر","خبرگزاری","دانشجویان"],"verified":true,"internalNetwork":false,"priority":91},
-    {"id":"mehrnews","name":"خبرگزاری مهر","url":"https://www.mehrnews.com/","category":"news","keywords":["مهر","خبرگزاری مهر","خبر","اخبار"],"verified":true,"internalNetwork":false,"priority":90},
-    {"id":"tasnim","name":"خبرگزاری تسنیم","url":"https://www.tasnimnews.com/","category":"news","keywords":["تسنیم","خبرگزاری تسنیم","خبر","اخبار"],"verified":true,"internalNetwork":false,"priority":89},
-    {"id":"road-141","name":"سامانه ۱۴۱","url":"https://141.ir/","category":"transport","keywords":["۱۴۱","141","راه","جاده","ترافیک","وضعیت راه"],"verified":true,"internalNetwork":false,"priority":88},
-    {"id":"rahvar120","name":"راهور ۱۲۰","url":"https://rahvar120.ir/","category":"government","keywords":["راهور","پلیس راهور","خلافی","پلاک","گواهینامه"],"verified":true,"internalNetwork":false,"priority":87},
-    {"id":"irimo","name":"سازمان هواشناسی کشور","url":"https://www.irimo.ir/","category":"weather","keywords":["هواشناسی","آب و هوا","باران","هوا","پیش بینی"],"verified":true,"internalNetwork":false,"priority":86},
-    {"id":"post","name":"شرکت ملی پست","url":"https://post.ir/","category":"government","keywords":["پست","رهگیری مرسوله","کد پستی","مرسوله"],"verified":true,"internalNetwork":false,"priority":85},
-    {"id":"ut","name":"دانشگاه تهران","url":"https://ut.ac.ir/","category":"education","keywords":["دانشگاه تهران","دانشگاه","آموزش","پژوهش"],"verified":true,"internalNetwork":false,"priority":84},
-    {"id":"sanjesh","name":"سازمان سنجش آموزش کشور","url":"https://www.sanjesh.org/","category":"education","keywords":["سنجش","کنکور","آزمون","دانشگاه","نتایج"],"verified":true,"internalNetwork":false,"priority":83},
-    {"id":"rubika","name":"روبیکا","url":"https://rubika.ir/","category":"communication","keywords":["روبیکا","پیام رسان","شبکه اجتماعی","پیام"],"verified":true,"internalNetwork":false,"priority":82},
-    {"id":"bale","name":"بله","url":"https://ble.ir/","category":"communication","keywords":["بله","پیام رسان","پیام","بانک"],"verified":true,"internalNetwork":false,"priority":81},
-    {"id":"splus","name":"سروش پلاس","url":"https://splus.ir/","category":"communication","keywords":["سروش","سروش پلاس","پیام رسان","پیام"],"verified":true,"internalNetwork":false,"priority":80},
-    {"id":"eitaa","name":"ایتا","url":"https://www.eitaa.com/","category":"communication","keywords":["ایتا","پیام رسان","پیام"],"verified":true,"internalNetwork":false,"priority":79}
+    {
+      "id": "zarebin",
+      "name": "جستجوگر ذره‌بین",
+      "url": "https://zarebin.ir/",
+      "category": "search",
+      "keywords": [
+        "ذره بین",
+        "ذره‌بین",
+        "جستجو",
+        "جستجوگر ایرانی",
+        "موتور جستجو"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 120
+    },
+    {
+      "id": "mygov",
+      "name": "پنجره ملی خدمات دولت هوشمند",
+      "url": "https://my.gov.ir/",
+      "category": "government",
+      "keywords": [
+        "دولت من",
+        "دولت",
+        "خدمات دولت",
+        "پنجره ملی",
+        "خدمات الکترونیک"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 118
+    },
+    {
+      "id": "tamin",
+      "name": "سازمان تأمین اجتماعی",
+      "url": "https://www.tamin.ir/",
+      "category": "government",
+      "keywords": [
+        "تامین اجتماعی",
+        "تأمین اجتماعی",
+        "بیمه",
+        "بازنشستگی",
+        "مستمری"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 116
+    },
+    {
+      "id": "tamin-eservices",
+      "name": "خدمات غیرحضوری تأمین اجتماعی",
+      "url": "https://eservices.tamin.ir/",
+      "category": "government",
+      "keywords": [
+        "سوابق بیمه",
+        "خدمات غیرحضوری",
+        "فیش حقوقی",
+        "تامین اجتماعی"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 115
+    },
+    {
+      "id": "cbi",
+      "name": "بانک مرکزی جمهوری اسلامی ایران",
+      "url": "https://www.cbi.ir/",
+      "category": "banking",
+      "keywords": [
+        "بانک مرکزی",
+        "ارز",
+        "نرخ ارز",
+        "قیمت دلار",
+        "بانک",
+        "پرداخت"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 112
+    },
+    {
+      "id": "shaparak",
+      "name": "شاپرک",
+      "url": "https://www.shaparak.ir/",
+      "category": "banking",
+      "keywords": [
+        "شاپرک",
+        "پرداخت",
+        "کارت بانکی",
+        "درگاه پرداخت"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 110
+    },
+    {
+      "id": "bmi",
+      "name": "بانک ملی ایران",
+      "url": "https://www.bmi.ir/",
+      "category": "banking",
+      "keywords": [
+        "بانک ملی",
+        "بام",
+        "بانکداری اینترنتی",
+        "بانک"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 108
+    },
+    {
+      "id": "bankmellat",
+      "name": "بانک ملت",
+      "url": "https://www.bankmellat.ir/",
+      "category": "banking",
+      "keywords": [
+        "بانک ملت",
+        "به پرداخت",
+        "بانکداری اینترنتی",
+        "بانک"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 107
+    },
+    {
+      "id": "tejarat",
+      "name": "بانک تجارت",
+      "url": "https://www.tejaratbank.ir/",
+      "category": "banking",
+      "keywords": [
+        "بانک تجارت",
+        "بانکداری اینترنتی",
+        "بانک"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 106
+    },
+    {
+      "id": "bsi",
+      "name": "بانک صادرات ایران",
+      "url": "https://www.bsi.ir/",
+      "category": "banking",
+      "keywords": [
+        "بانک صادرات",
+        "سپهر",
+        "بانکداری اینترنتی",
+        "بانک"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 105
+    },
+    {
+      "id": "mci",
+      "name": "همراه اول",
+      "url": "https://mci.ir/",
+      "category": "operator",
+      "keywords": [
+        "همراه اول",
+        "سیم کارت",
+        "اینترنت همراه",
+        "قبض",
+        "اپراتور"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 103
+    },
+    {
+      "id": "irancell",
+      "name": "ایرانسل",
+      "url": "https://irancell.ir/",
+      "category": "operator",
+      "keywords": [
+        "ایرانسل",
+        "سیم کارت",
+        "اینترنت همراه",
+        "اپراتور"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 102
+    },
+    {
+      "id": "rightel",
+      "name": "رایتل",
+      "url": "https://www.rightel.ir/",
+      "category": "operator",
+      "keywords": [
+        "رایتل",
+        "سیم کارت",
+        "اینترنت همراه",
+        "اپراتور"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 101
+    },
+    {
+      "id": "aparat",
+      "name": "آپارات",
+      "url": "https://www.aparat.com/",
+      "category": "video",
+      "keywords": [
+        "آپارات",
+        "ویدیو",
+        "فیلم",
+        "ویدئو",
+        "اشتراک ویدیو"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 100
+    },
+    {
+      "id": "filmcase",
+      "name": "فیلم‌کیس",
+      "url": "https://filmcase.ir/",
+      "category": "video",
+      "description": "پلتفرم ایرانی تماشای رایگان فیلم و سریال با محتوای به‌روز، امتیاز IMDb، دسته‌بندی محتوایی، شبکه‌های زنده و قابلیت نصب روی دستگاه.",
+      "features": [
+        "تماشای رایگان فیلم و سریال",
+        "جدیدترین فیلم‌ها",
+        "جدیدترین سریال‌ها",
+        "امتیاز IMDb و سال انتشار",
+        "دوبله فارسی",
+        "انیمیشن",
+        "مستند",
+        "شبکه ۳",
+        "شبکه نسیم",
+        "شبکه ورزش",
+        "اسپرت ۱",
+        "پخش زنده شبکه‌ها",
+        "قابل نصب روی دستگاه",
+        "وب‌اپ PWA",
+        "جستجوی فیلم و سریال"
+      ],
+      "keywords": [
+        "فیلم کیس",
+        "فیلم‌کیس",
+        "FilmCase",
+        "فیلم",
+        "سریال",
+        "تماشای آنلاین",
+        "تماشای رایگان",
+        "دوبله فارسی",
+        "انیمیشن",
+        "مستند",
+        "IMDB",
+        "پخش زنده",
+        "شبکه تلویزیونی",
+        "اپلیکیشن فیلم",
+        "PWA"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 100
+    },
+    {
+      "id": "filimo",
+      "name": "فیلیمو",
+      "url": "https://www.filimo.com/",
+      "category": "video",
+      "keywords": [
+        "فیلیمو",
+        "فیلم",
+        "سریال",
+        "تماشای آنلاین"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 99
+    },
+    {
+      "id": "namava",
+      "name": "نماوا",
+      "url": "https://www.namava.ir/",
+      "category": "video",
+      "keywords": [
+        "نماوا",
+        "فیلم",
+        "سریال",
+        "تماشای آنلاین"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 98
+    },
+    {
+      "id": "digikala",
+      "name": "دیجی‌کالا",
+      "url": "https://www.digikala.com/",
+      "category": "shopping",
+      "keywords": [
+        "دیجی کالا",
+        "دیجی‌کالا",
+        "فروشگاه",
+        "خرید",
+        "کالا"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 97
+    },
+    {
+      "id": "noraashop",
+      "name": "نورا شاپ",
+      "url": "https://noraashop.ir/",
+      "category": "shopping",
+      "description": "فروشگاه اینترنتی لوازم آرایشی و بهداشتی با دسته‌های آرایش لب، چشم، صورت و ابرو، مراقبت پوست، ابزار آرایشی و بهداشتی، مو، ناخن و اکسسوری.",
+      "features": [
+        "فروشگاه اینترنتی لوازم آرایشی",
+        "آرایش لب",
+        "آرایش چشم",
+        "آرایش صورت",
+        "آرایش ابرو",
+        "مراقبت پوست",
+        "ابزار آرایشی",
+        "ابزار بهداشتی",
+        "آرایش و اکسسوری مو",
+        "ناخن",
+        "رژ لب",
+        "ریمل",
+        "خط چشم",
+        "کانسیلر",
+        "کانتور",
+        "هایلایتر",
+        "آبرسان و ماسک پوست",
+        "لیست علاقه‌مندی‌ها",
+        "مقایسه محصول",
+        "خرید قسطی",
+        "رهگیری سفارشات",
+        "ورود و ثبت‌نام پیامکی OTP",
+        "سبد خرید و تسویه حساب",
+        "پرسش‌های متداول",
+        "وبلاگ",
+        "پرداخت زرین‌پال",
+        "زرین‌پلاس",
+        "اسنپ‌پی",
+        "ترب‌پی",
+        "ارسال هوشمند"
+      ],
+      "keywords": [
+        "نورا شاپ",
+        "NoraaShop",
+        "فروشگاه آرایشی",
+        "لوازم آرایشی",
+        "لوازم بهداشتی",
+        "مراقبت پوست",
+        "رژ لب",
+        "ریمل",
+        "خط چشم",
+        "کانسیلر",
+        "کانتور",
+        "هایلایتر",
+        "آرایش چشم",
+        "آرایش صورت",
+        "آرایش لب",
+        "ابزار آرایشی",
+        "خرید قسطی",
+        "اسنپ پی",
+        "ترب پی",
+        "رهگیری سفارش",
+        "مقایسه محصول",
+        "OTP",
+        "خرید آنلاین"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 97
+    },
+    {
+      "id": "torob",
+      "name": "ترب",
+      "url": "https://torob.com/",
+      "category": "shopping",
+      "keywords": [
+        "ترب",
+        "مقایسه قیمت",
+        "خرید",
+        "فروشگاه",
+        "قیمت کالا"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 96
+    },
+    {
+      "id": "snapp",
+      "name": "اسنپ",
+      "url": "https://snapp.ir/",
+      "category": "transport",
+      "keywords": [
+        "اسنپ",
+        "تاکسی",
+        "سفر",
+        "حمل و نقل"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 95
+    },
+    {
+      "id": "neshan",
+      "name": "نشان",
+      "url": "https://neshan.org/",
+      "category": "map",
+      "keywords": [
+        "نشان",
+        "نقشه",
+        "مسیریاب",
+        "ترافیک",
+        "آدرس"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 94
+    },
+    {
+      "id": "balad",
+      "name": "بلد",
+      "url": "https://balad.ir/",
+      "category": "map",
+      "keywords": [
+        "بلد",
+        "نقشه",
+        "مسیریاب",
+        "ترافیک",
+        "آدرس"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 93
+    },
+    {
+      "id": "irna",
+      "name": "خبرگزاری جمهوری اسلامی - ایرنا",
+      "url": "https://www.irna.ir/",
+      "category": "news",
+      "keywords": [
+        "ایرنا",
+        "خبر",
+        "خبرگزاری",
+        "اخبار ایران"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 92
+    },
+    {
+      "id": "isna",
+      "name": "خبرگزاری ایسنا",
+      "url": "https://www.isna.ir/",
+      "category": "news",
+      "keywords": [
+        "ایسنا",
+        "خبر",
+        "خبرگزاری",
+        "دانشجویان"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 91
+    },
+    {
+      "id": "mehrnews",
+      "name": "خبرگزاری مهر",
+      "url": "https://www.mehrnews.com/",
+      "category": "news",
+      "keywords": [
+        "مهر",
+        "خبرگزاری مهر",
+        "خبر",
+        "اخبار"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 90
+    },
+    {
+      "id": "tasnim",
+      "name": "خبرگزاری تسنیم",
+      "url": "https://www.tasnimnews.com/",
+      "category": "news",
+      "keywords": [
+        "تسنیم",
+        "خبرگزاری تسنیم",
+        "خبر",
+        "اخبار"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 89
+    },
+    {
+      "id": "road-141",
+      "name": "سامانه ۱۴۱",
+      "url": "https://141.ir/",
+      "category": "transport",
+      "keywords": [
+        "۱۴۱",
+        "141",
+        "راه",
+        "جاده",
+        "ترافیک",
+        "وضعیت راه"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 88
+    },
+    {
+      "id": "rahvar120",
+      "name": "راهور ۱۲۰",
+      "url": "https://rahvar120.ir/",
+      "category": "government",
+      "keywords": [
+        "راهور",
+        "پلیس راهور",
+        "خلافی",
+        "پلاک",
+        "گواهینامه"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 87
+    },
+    {
+      "id": "irimo",
+      "name": "سازمان هواشناسی کشور",
+      "url": "https://www.irimo.ir/",
+      "category": "weather",
+      "keywords": [
+        "هواشناسی",
+        "آب و هوا",
+        "باران",
+        "هوا",
+        "پیش بینی"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 86
+    },
+    {
+      "id": "post",
+      "name": "شرکت ملی پست",
+      "url": "https://post.ir/",
+      "category": "government",
+      "keywords": [
+        "پست",
+        "رهگیری مرسوله",
+        "کد پستی",
+        "مرسوله"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 85
+    },
+    {
+      "id": "ut",
+      "name": "دانشگاه تهران",
+      "url": "https://ut.ac.ir/",
+      "category": "education",
+      "keywords": [
+        "دانشگاه تهران",
+        "دانشگاه",
+        "آموزش",
+        "پژوهش"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 84
+    },
+    {
+      "id": "sanjesh",
+      "name": "سازمان سنجش آموزش کشور",
+      "url": "https://www.sanjesh.org/",
+      "category": "education",
+      "keywords": [
+        "سنجش",
+        "کنکور",
+        "آزمون",
+        "دانشگاه",
+        "نتایج"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 83
+    },
+    {
+      "id": "rubika",
+      "name": "روبیکا",
+      "url": "https://rubika.ir/",
+      "category": "communication",
+      "keywords": [
+        "روبیکا",
+        "پیام رسان",
+        "شبکه اجتماعی",
+        "پیام"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 82
+    },
+    {
+      "id": "bale",
+      "name": "بله",
+      "url": "https://ble.ir/",
+      "category": "communication",
+      "keywords": [
+        "بله",
+        "پیام رسان",
+        "پیام",
+        "بانک"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 81
+    },
+    {
+      "id": "tax",
+      "name": "سازمان امور مالیاتی کشور",
+      "url": "https://www.intamedia.ir/",
+      "category": "government",
+      "keywords": [
+        "مالیات",
+        "اظهارنامه",
+        "مودیان"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 80
+    },
+    {
+      "id": "splus",
+      "name": "سروش پلاس",
+      "url": "https://splus.ir/",
+      "category": "communication",
+      "keywords": [
+        "سروش",
+        "سروش پلاس",
+        "پیام رسان",
+        "پیام"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 80
+    },
+    {
+      "id": "eitaa",
+      "name": "ایتا",
+      "url": "https://www.eitaa.com/",
+      "category": "communication",
+      "keywords": [
+        "ایتا",
+        "پیام رسان",
+        "پیام"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 79
+    },
+    {
+      "id": "sana",
+      "name": "سامانه ثنا",
+      "url": "https://sana.adliran.ir/",
+      "category": "government",
+      "keywords": [
+        "ثنا",
+        "قوه قضاییه",
+        "ابلاغ قضایی"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 79
+    },
+    {
+      "id": "postbank",
+      "name": "پست بانک ایران",
+      "url": "https://www.postbank.ir/",
+      "category": "banking",
+      "keywords": [
+        "پست بانک",
+        "بانک"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 79
+    },
+    {
+      "id": "refah-bank",
+      "name": "بانک رفاه کارگران",
+      "url": "https://www.refah-bank.ir/",
+      "category": "banking",
+      "keywords": [
+        "بانک رفاه",
+        "بانک"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 78
+    },
+    {
+      "id": "bertina-search",
+      "name": "جستجوگر برتینا",
+      "url": "https://search.bertina.ir/",
+      "category": "search",
+      "keywords": [
+        "برتینا",
+        "جستجوگر ایرانی"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 78
+    },
+    {
+      "id": "farsnews",
+      "name": "خبرگزاری فارس",
+      "url": "https://farsnews.ir/",
+      "category": "news",
+      "keywords": [
+        "فارس",
+        "خبرگزاری",
+        "اخبار"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 78
+    },
+    {
+      "id": "epolice",
+      "name": "خدمات الکترونیک پلیس",
+      "url": "https://www.epolice.ir/",
+      "category": "government",
+      "keywords": [
+        "پلیس",
+        "انتظامی",
+        "خدمات پلیس"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 78
+    },
+    {
+      "id": "banksepah",
+      "name": "بانک سپه",
+      "url": "https://www.banksepah.ir/",
+      "category": "banking",
+      "keywords": [
+        "بانک سپه",
+        "بانک"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 77
+    },
+    {
+      "id": "shadbin",
+      "name": "جستجوگر شادبین",
+      "url": "https://shaadbin.ir/",
+      "category": "search",
+      "keywords": [
+        "شادبین",
+        "جستجوگر ایرانی"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 77
+    },
+    {
+      "id": "khabaronline",
+      "name": "خبرآنلاین",
+      "url": "https://www.khabaronline.ir/",
+      "category": "news",
+      "keywords": [
+        "خبرآنلاین",
+        "خبر"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 77
+    },
+    {
+      "id": "sabteahval",
+      "name": "سازمان ثبت احوال",
+      "url": "https://www.sabteahval.ir/",
+      "category": "government",
+      "keywords": [
+        "ثبت احوال",
+        "کارت ملی",
+        "شناسنامه"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 77
+    },
+    {
+      "id": "bki",
+      "name": "بانک کشاورزی",
+      "url": "https://www.bki.ir/",
+      "category": "banking",
+      "keywords": [
+        "بانک کشاورزی",
+        "بانک"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 76
+    },
+    {
+      "id": "gerdoo",
+      "name": "جستجوگر گردو",
+      "url": "https://gerdoo.me/",
+      "category": "search",
+      "keywords": [
+        "گردو",
+        "جستجوگر ایرانی"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 76
+    },
+    {
+      "id": "ssaa",
+      "name": "سازمان ثبت اسناد و املاک",
+      "url": "https://www.ssaa.ir/",
+      "category": "government",
+      "keywords": [
+        "ثبت اسناد",
+        "املاک",
+        "سند"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 76
+    },
+    {
+      "id": "asriran",
+      "name": "عصر ایران",
+      "url": "https://www.asriran.com/",
+      "category": "news",
+      "keywords": [
+        "عصر ایران",
+        "خبر"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 76
+    },
+    {
+      "id": "basalam",
+      "name": "باسلام",
+      "url": "https://basalam.com/",
+      "category": "shopping",
+      "keywords": [
+        "باسلام",
+        "فروشگاه",
+        "بازار"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 75
+    },
+    {
+      "id": "bank-maskan",
+      "name": "بانک مسکن",
+      "url": "https://www.bank-maskan.ir/",
+      "category": "banking",
+      "keywords": [
+        "بانک مسکن",
+        "بانک"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 75
+    },
+    {
+      "id": "adliran",
+      "name": "درگاه خدمات الکترونیک قضایی",
+      "url": "https://www.adliran.ir/",
+      "category": "government",
+      "keywords": [
+        "عدلیه",
+        "قضایی",
+        "دادگستری"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 75
+    },
+    {
+      "id": "shargh",
+      "name": "روزنامه شرق",
+      "url": "https://www.sharghdaily.com/",
+      "category": "news",
+      "keywords": [
+        "شرق",
+        "روزنامه",
+        "خبر"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 75
+    },
+    {
+      "id": "sb24",
+      "name": "بانک سامان",
+      "url": "https://www.sb24.com/",
+      "category": "banking",
+      "keywords": [
+        "بانک سامان",
+        "بانک"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 74
+    },
+    {
+      "id": "technolife",
+      "name": "تکنولایف",
+      "url": "https://www.technolife.com/",
+      "category": "shopping",
+      "keywords": [
+        "تکنولایف",
+        "فروشگاه",
+        "موبایل"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 74
+    },
+    {
+      "id": "tracking-post",
+      "name": "رهگیری مرسولات پستی",
+      "url": "https://tracking.post.ir/",
+      "category": "government",
+      "keywords": [
+        "رهگیری مرسوله",
+        "پست"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 74
+    },
+    {
+      "id": "peivast",
+      "name": "پیوست",
+      "url": "https://peivast.com/",
+      "category": "news",
+      "keywords": [
+        "پیوست",
+        "فناوری",
+        "خبر"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 74
+    },
+    {
+      "id": "okala",
+      "name": "اکالا",
+      "url": "https://okala.com/",
+      "category": "shopping",
+      "keywords": [
+        "اکالا",
+        "سوپرمارکت",
+        "خرید"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 73
+    },
+    {
+      "id": "bpi",
+      "name": "بانک پاسارگاد",
+      "url": "https://www.bpi.ir/",
+      "category": "banking",
+      "keywords": [
+        "بانک پاسارگاد",
+        "بانک"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 73
+    },
+    {
+      "id": "elanza",
+      "name": "الانزا",
+      "url": "https://elanza.com/",
+      "category": "shopping",
+      "keywords": [
+        "الانزا",
+        "آرایشی",
+        "فروشگاه"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 72
+    },
+    {
+      "id": "centinsur",
+      "name": "بیمه مرکزی",
+      "url": "https://www.centinsur.ir/",
+      "category": "insurance",
+      "keywords": [
+        "بیمه",
+        "استعلام بیمه"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 70
+    },
+    {
+      "id": "cafebazaar",
+      "name": "کافه‌بازار",
+      "url": "https://cafebazaar.ir/",
+      "category": "downloads",
+      "keywords": [
+        "کافه بازار",
+        "اپلیکیشن",
+        "دانلود"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 70
+    },
+    {
+      "id": "iraninsurance",
+      "name": "بیمه ایران",
+      "url": "https://iraninsurance.ir/",
+      "category": "insurance",
+      "keywords": [
+        "بیمه ایران",
+        "بیمه"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 69
+    },
+    {
+      "id": "filmnet",
+      "name": "فیلم‌نت",
+      "url": "https://filmnet.ir/",
+      "category": "video",
+      "keywords": [
+        "فیلم نت",
+        "فیلم",
+        "سریال"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 69
+    },
+    {
+      "id": "myket",
+      "name": "مایکت",
+      "url": "https://myket.ir/",
+      "category": "downloads",
+      "keywords": [
+        "مایکت",
+        "اپلیکیشن",
+        "دانلود"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 69
+    },
+    {
+      "id": "dana-insurance",
+      "name": "بیمه دانا",
+      "url": "https://www.dana-insurance.com/",
+      "category": "insurance",
+      "keywords": [
+        "بیمه دانا",
+        "بیمه"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 68
+    },
+    {
+      "id": "soft98",
+      "name": "سافت ۹۸",
+      "url": "https://soft98.ir/",
+      "category": "downloads",
+      "keywords": [
+        "سافت 98",
+        "نرم افزار",
+        "دانلود"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 68
+    },
+    {
+      "id": "namasha",
+      "name": "نماشا",
+      "url": "https://www.namasha.com/",
+      "category": "video",
+      "keywords": [
+        "نماشا",
+        "ویدیو"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 68
+    },
+    {
+      "id": "azki",
+      "name": "ازکی",
+      "url": "https://www.azki.com/",
+      "category": "insurance",
+      "keywords": [
+        "ازکی",
+        "بیمه",
+        "مقایسه بیمه"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 67
+    },
+    {
+      "id": "yasdl",
+      "name": "یاس دانلود",
+      "url": "https://www.yasdl.com/",
+      "category": "downloads",
+      "keywords": [
+        "یاس دانلود",
+        "نرم افزار"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 67
+    },
+    {
+      "id": "bimeh-com",
+      "name": "بیمه‌دات‌کام",
+      "url": "https://bimeh.com/",
+      "category": "insurance",
+      "keywords": [
+        "بیمه",
+        "خرید بیمه"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 66
+    },
+    {
+      "id": "downloadha",
+      "name": "دانلودها",
+      "url": "https://www.downloadha.com/",
+      "category": "downloads",
+      "keywords": [
+        "دانلودها",
+        "نرم افزار"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 66
+    },
+    {
+      "id": "igap",
+      "name": "آی‌گپ",
+      "url": "https://www.igap.net/",
+      "category": "communication",
+      "keywords": [
+        "آی گپ",
+        "پیام رسان"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 65
+    },
+    {
+      "id": "milad-hospital",
+      "name": "بیمارستان میلاد",
+      "url": "https://miladhospital.com/",
+      "category": "hospital",
+      "keywords": [
+        "بیمارستان میلاد",
+        "درمان"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 65
+    },
+    {
+      "id": "parspack",
+      "name": "پارس‌پک",
+      "url": "https://parspack.com/",
+      "category": "hosting",
+      "keywords": [
+        "پارس پک",
+        "هاست",
+        "سرور"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 65
+    },
+    {
+      "id": "snapp-taxi",
+      "name": "اسنپ",
+      "url": "https://snapp.ir/",
+      "category": "taxi",
+      "keywords": [
+        "اسنپ",
+        "تاکسی اینترنتی"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 64
+    },
+    {
+      "id": "farabi-hospital",
+      "name": "بیمارستان فارابی",
+      "url": "https://farabih.tums.ac.ir/",
+      "category": "hospital",
+      "keywords": [
+        "فارابی",
+        "بیمارستان",
+        "چشم پزشکی"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 64
+    },
+    {
+      "id": "didar",
+      "name": "دیدار CRM",
+      "url": "https://didar.me/",
+      "category": "hosting",
+      "keywords": [
+        "دیدار",
+        "CRM",
+        "کسب و کار"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 64
+    },
+    {
+      "id": "tapsi",
+      "name": "تپسی",
+      "url": "https://tapsi.ir/",
+      "category": "taxi",
+      "keywords": [
+        "تپسی",
+        "تاکسی اینترنتی"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 63
+    },
+    {
+      "id": "tehran-heart",
+      "name": "مرکز قلب تهران",
+      "url": "https://thc.tums.ac.ir/",
+      "category": "hospital",
+      "keywords": [
+        "مرکز قلب تهران",
+        "بیمارستان"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 63
+    },
+    {
+      "id": "gap",
+      "name": "گپ",
+      "url": "https://gap.im/",
+      "category": "communication",
+      "keywords": [
+        "گپ",
+        "پیام رسان"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 63
+    },
+    {
+      "id": "alopeyk",
+      "name": "الوپیک",
+      "url": "https://alopeyk.com/",
+      "category": "taxi",
+      "keywords": [
+        "الوپیک",
+        "پیک",
+        "ارسال"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 62
+    },
+    {
+      "id": "doctoreto",
+      "name": "دکترتو",
+      "url": "https://doctoreto.com/",
+      "category": "health",
+      "keywords": [
+        "دکترتو",
+        "پزشک",
+        "نوبت"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 62
+    },
+    {
+      "id": "alibaba",
+      "name": "علی‌بابا",
+      "url": "https://www.alibaba.ir/",
+      "category": "travel",
+      "keywords": [
+        "علی بابا",
+        "بلیت",
+        "سفر"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 62
+    },
+    {
+      "id": "drdr",
+      "name": "دکتردکتر",
+      "url": "https://drdr.ir/",
+      "category": "health",
+      "keywords": [
+        "دکتردکتر",
+        "پزشک",
+        "نوبت"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 61
+    },
+    {
+      "id": "mrbilit",
+      "name": "مستربلیط",
+      "url": "https://mrbilit.com/",
+      "category": "travel",
+      "keywords": [
+        "مستربلیط",
+        "بلیت",
+        "سفر"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 61
+    },
+    {
+      "id": "snappfood",
+      "name": "اسنپ‌فود",
+      "url": "https://snappfood.ir/",
+      "category": "food",
+      "keywords": [
+        "اسنپ فود",
+        "غذا",
+        "سفارش غذا"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 60
+    },
+    {
+      "id": "beeptunes",
+      "name": "بیپ‌تونز",
+      "url": "https://beeptunes.com/",
+      "category": "music",
+      "keywords": [
+        "بیپ تونز",
+        "موسیقی"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 60
+    },
+    {
+      "id": "jobinja",
+      "name": "جابینجا",
+      "url": "https://jobinja.ir/",
+      "category": "jobs",
+      "keywords": [
+        "جابینجا",
+        "کاریابی",
+        "استخدام"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 60
+    },
+    {
+      "id": "divar",
+      "name": "دیوار",
+      "url": "https://divar.ir/",
+      "category": "classifieds",
+      "keywords": [
+        "دیوار",
+        "نیازمندی",
+        "آگهی"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 60
+    },
+    {
+      "id": "raja",
+      "name": "رجا",
+      "url": "https://www.raja.ir/",
+      "category": "travel",
+      "keywords": [
+        "رجا",
+        "قطار",
+        "بلیت"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 60
+    },
+    {
+      "id": "fidibo",
+      "name": "فیدیبو",
+      "url": "https://fidibo.com/",
+      "category": "books",
+      "keywords": [
+        "فیدیبو",
+        "کتاب",
+        "کتابخوان"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 60
+    },
+    {
+      "id": "nobat",
+      "name": "نوبت‌آی‌آر",
+      "url": "https://nobat.ir/",
+      "category": "health",
+      "keywords": [
+        "نوبت",
+        "پزشک"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 60
+    },
+    {
+      "id": "hoosha",
+      "name": "هوشا",
+      "url": "https://hoosha.com/",
+      "category": "ai",
+      "keywords": [
+        "هوشا",
+        "هوش مصنوعی",
+        "AI"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 60
+    },
+    {
+      "id": "varzesh3",
+      "name": "ورزش سه",
+      "url": "https://www.varzesh3.com/",
+      "category": "sports",
+      "keywords": [
+        "ورزش سه",
+        "فوتبال",
+        "ورزش"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 60
+    },
+    {
+      "id": "upmusic",
+      "name": "آپ موزیک",
+      "url": "https://upmusics.com/",
+      "category": "music",
+      "keywords": [
+        "آپ موزیک",
+        "موسیقی"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 59
+    },
+    {
+      "id": "jobvision",
+      "name": "جاب‌ویژن",
+      "url": "https://jobvision.ir/",
+      "category": "jobs",
+      "keywords": [
+        "جاب ویژن",
+        "کاریابی",
+        "استخدام"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 59
+    },
+    {
+      "id": "delino",
+      "name": "دلینو",
+      "url": "https://www.delino.com/",
+      "category": "food",
+      "keywords": [
+        "دلینو",
+        "غذا",
+        "سفارش غذا"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 59
+    },
+    {
+      "id": "zigap",
+      "name": "زیگپ",
+      "url": "https://zigap.ir/",
+      "category": "ai",
+      "keywords": [
+        "زیگپ",
+        "هوش مصنوعی",
+        "چت بات"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 59
+    },
+    {
+      "id": "sheypoor",
+      "name": "شیپور",
+      "url": "https://www.sheypoor.com/",
+      "category": "classifieds",
+      "keywords": [
+        "شیپور",
+        "نیازمندی",
+        "آگهی"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 59
+    },
+    {
+      "id": "taaghche",
+      "name": "طاقچه",
+      "url": "https://taaghche.com/",
+      "category": "books",
+      "keywords": [
+        "طاقچه",
+        "کتاب",
+        "کتابخوان"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 59
+    },
+    {
+      "id": "football360",
+      "name": "فوتبال ۳۶۰",
+      "url": "https://football360.ir/",
+      "category": "sports",
+      "keywords": [
+        "فوتبال 360",
+        "فوتبال"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 59
+    },
+    {
+      "id": "iranestekhdam",
+      "name": "ایران استخدام",
+      "url": "https://iranestekhdam.ir/",
+      "category": "jobs",
+      "keywords": [
+        "ایران استخدام",
+        "کاریابی"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 58
+    },
+    {
+      "id": "iau",
+      "name": "دانشگاه آزاد اسلامی",
+      "url": "https://www.iau.ac.ir/",
+      "category": "education",
+      "keywords": [
+        "دانشگاه آزاد",
+        "دانشگاه"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 58
+    },
+    {
+      "id": "ivira",
+      "name": "ویرا",
+      "url": "https://ivira.ai/",
+      "category": "ai",
+      "keywords": [
+        "ویرا",
+        "هوش مصنوعی",
+        "AI"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 58
+    },
+    {
+      "id": "ketabrah",
+      "name": "کتابراه",
+      "url": "https://www.ketabrah.ir/",
+      "category": "books",
+      "keywords": [
+        "کتابراه",
+        "کتاب"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 58
+    },
+    {
+      "id": "sharif",
+      "name": "دانشگاه صنعتی شریف",
+      "url": "https://www.sharif.edu/",
+      "category": "education",
+      "keywords": [
+        "شریف",
+        "دانشگاه"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 57
+    },
+    {
+      "id": "gapgpt",
+      "name": "گپ‌جی‌پی‌تی",
+      "url": "https://gapgpt.app/",
+      "category": "ai",
+      "keywords": [
+        "گپ جی پی تی",
+        "هوش مصنوعی"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 57
+    },
+    {
+      "id": "aut",
+      "name": "دانشگاه صنعتی امیرکبیر",
+      "url": "https://aut.ac.ir/",
+      "category": "education",
+      "keywords": [
+        "امیرکبیر",
+        "دانشگاه"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 56
+    },
+    {
+      "id": "abadis",
+      "name": "آبادیس",
+      "url": "https://abadis.ir/",
+      "category": "dictionary",
+      "keywords": [
+        "آبادیس",
+        "دیکشنری",
+        "ترجمه"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 55
+    },
+    {
+      "id": "time-ir",
+      "name": "تایم دات آی‌آر",
+      "url": "https://www.time.ir/",
+      "category": "utilities",
+      "keywords": [
+        "تاریخ",
+        "ساعت",
+        "تقویم",
+        "اوقات شرعی"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 55
+    },
+    {
+      "id": "takhfifan",
+      "name": "تخفیفان",
+      "url": "https://takhfifan.com/",
+      "category": "discount",
+      "keywords": [
+        "تخفیفان",
+        "تخفیف"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 55
+    },
+    {
+      "id": "roshd",
+      "name": "شبکه رشد",
+      "url": "https://www.roshd.ir/",
+      "category": "education",
+      "keywords": [
+        "رشد",
+        "آموزش",
+        "دانش آموز"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 55
+    },
+    {
+      "id": "achareh",
+      "name": "آچاره",
+      "url": "https://achareh.ir/",
+      "category": "utilities",
+      "keywords": [
+        "آچاره",
+        "خدمات منزل"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 54
+    },
+    {
+      "id": "targoman",
+      "name": "ترگمان",
+      "url": "https://targoman.ir/",
+      "category": "dictionary",
+      "keywords": [
+        "ترگمان",
+        "ترجمه"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 54
+    },
+    {
+      "id": "kanoon",
+      "name": "قلم‌چی",
+      "url": "https://www.kanoon.ir/",
+      "category": "education",
+      "keywords": [
+        "قلم چی",
+        "آزمون",
+        "آموزش"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 54
+    },
+    {
+      "id": "mopon",
+      "name": "موپن",
+      "url": "https://www.mopon.ir/",
+      "category": "discount",
+      "keywords": [
+        "موپن",
+        "کد تخفیف"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 54
+    },
+    {
+      "id": "bahesab",
+      "name": "با حساب",
+      "url": "https://www.bahesab.ir/",
+      "category": "utilities",
+      "keywords": [
+        "با حساب",
+        "محاسبه آنلاین"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 53
+    },
+    {
+      "id": "uploadkon",
+      "name": "آپلودکن",
+      "url": "https://uploadkon.ir/",
+      "category": "upload",
+      "keywords": [
+        "آپلودکن",
+        "آپلود فایل"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 50
+    },
+    {
+      "id": "mailfa",
+      "name": "میل‌فا",
+      "url": "https://mailfa.com/",
+      "category": "email",
+      "keywords": [
+        "میل فا",
+        "ایمیل"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 50
+    },
+    {
+      "id": "picofile",
+      "name": "پیکوفایل",
+      "url": "https://www.picofile.com/",
+      "category": "upload",
+      "keywords": [
+        "پیکوفایل",
+        "آپلود فایل"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 49
+    },
+    {
+      "id": "chmail",
+      "name": "چاپار",
+      "url": "https://accounts.chmail.ir/",
+      "category": "email",
+      "keywords": [
+        "چاپار",
+        "ایمیل"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 49
+    },
+    {
+      "id": "uupload",
+      "name": "یوآپلود",
+      "url": "https://uupload.ir/",
+      "category": "upload",
+      "keywords": [
+        "یوآپلود",
+        "آپلود فایل"
+      ],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 48
+    }
   ]
 }

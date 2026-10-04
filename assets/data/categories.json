@@ -1,20 +1,203 @@
 {
-  "version": 2,
+  "version": 3,
   "categories": [
-    {"id":"search","title":"جستجو","icon":"search","order":1},
-    {"id":"government","title":"دولت و خدمات عمومی","icon":"account_balance","order":2},
-    {"id":"banking","title":"بانک و پرداخت","icon":"account_balance_wallet","order":3},
-    {"id":"shopping","title":"فروشگاه و خرید","icon":"shopping_bag","order":4},
-    {"id":"news","title":"خبر و رسانه","icon":"newspaper","order":5},
-    {"id":"education","title":"آموزش و دانشگاه","icon":"school","order":6},
-    {"id":"transport","title":"حمل‌ونقل و سفر","icon":"directions_car","order":7},
-    {"id":"map","title":"نقشه و مسیریابی","icon":"map","order":8},
-    {"id":"weather","title":"هواشناسی","icon":"cloud","order":9},
-    {"id":"health","title":"سلامت و درمان","icon":"health_and_safety","order":10},
-    {"id":"video","title":"ویدیو و سرگرمی","icon":"play_circle","order":11},
-    {"id":"communication","title":"پیام‌رسان و ارتباطات","icon":"forum","order":12},
-    {"id":"operator","title":"اپراتورها و اینترنت","icon":"cell_tower","order":13},
-    {"id":"technology","title":"فناوری و خدمات آنلاین","icon":"devices","order":14},
-    {"id":"other","title":"سایر خدمات","icon":"apps","order":99}
+    {
+      "id": "search",
+      "title": "جستجو",
+      "icon": "search",
+      "order": 1
+    },
+    {
+      "id": "government",
+      "title": "دولت و خدمات عمومی",
+      "icon": "account_balance",
+      "order": 2
+    },
+    {
+      "id": "banking",
+      "title": "بانک و پرداخت",
+      "icon": "account_balance_wallet",
+      "order": 3
+    },
+    {
+      "id": "shopping",
+      "title": "فروشگاه و خرید",
+      "icon": "shopping_bag",
+      "order": 4
+    },
+    {
+      "id": "news",
+      "title": "خبر و رسانه",
+      "icon": "newspaper",
+      "order": 5
+    },
+    {
+      "id": "education",
+      "title": "آموزش و دانشگاه",
+      "icon": "school",
+      "order": 6
+    },
+    {
+      "id": "transport",
+      "title": "حمل‌ونقل و سفر",
+      "icon": "directions_car",
+      "order": 7
+    },
+    {
+      "id": "map",
+      "title": "نقشه و مسیریابی",
+      "icon": "map",
+      "order": 8
+    },
+    {
+      "id": "weather",
+      "title": "هواشناسی",
+      "icon": "cloud",
+      "order": 9
+    },
+    {
+      "id": "health",
+      "title": "سلامت و درمان",
+      "icon": "health_and_safety",
+      "order": 10
+    },
+    {
+      "id": "video",
+      "title": "ویدیو و سرگرمی",
+      "icon": "play_circle",
+      "order": 11
+    },
+    {
+      "id": "communication",
+      "title": "پیام‌رسان و ارتباطات",
+      "icon": "forum",
+      "order": 12
+    },
+    {
+      "id": "operator",
+      "title": "اپراتورها و اینترنت",
+      "icon": "cell_tower",
+      "order": 13
+    },
+    {
+      "id": "technology",
+      "title": "فناوری و خدمات آنلاین",
+      "icon": "devices",
+      "order": 14
+    },
+    {
+      "id": "insurance",
+      "title": "بیمه",
+      "icon": "verified_user",
+      "order": 15
+    },
+    {
+      "id": "hospital",
+      "title": "بیمارستان و مراکز درمانی",
+      "icon": "local_hospital",
+      "order": 16
+    },
+    {
+      "id": "downloads",
+      "title": "دانلود و اپلیکیشن",
+      "icon": "download",
+      "order": 17
+    },
+    {
+      "id": "hosting",
+      "title": "هاستینگ و خدمات کسب‌وکار",
+      "icon": "dns",
+      "order": 18
+    },
+    {
+      "id": "taxi",
+      "title": "تاکسی و پیک اینترنتی",
+      "icon": "local_taxi",
+      "order": 19
+    },
+    {
+      "id": "ai",
+      "title": "هوش مصنوعی",
+      "icon": "auto_awesome",
+      "order": 20
+    },
+    {
+      "id": "music",
+      "title": "موسیقی و پادکست",
+      "icon": "headphones",
+      "order": 21
+    },
+    {
+      "id": "food",
+      "title": "سفارش غذا",
+      "icon": "restaurant",
+      "order": 22
+    },
+    {
+      "id": "books",
+      "title": "کتاب و کتابخوان",
+      "icon": "menu_book",
+      "order": 23
+    },
+    {
+      "id": "travel",
+      "title": "بلیت و گردشگری",
+      "icon": "flight",
+      "order": 24
+    },
+    {
+      "id": "discount",
+      "title": "تخفیف و خرید اقتصادی",
+      "icon": "local_offer",
+      "order": 25
+    },
+    {
+      "id": "jobs",
+      "title": "کاریابی",
+      "icon": "work",
+      "order": 26
+    },
+    {
+      "id": "email",
+      "title": "ایمیل",
+      "icon": "mail",
+      "order": 27
+    },
+    {
+      "id": "dictionary",
+      "title": "دیکشنری و ترجمه",
+      "icon": "translate",
+      "order": 28
+    },
+    {
+      "id": "sports",
+      "title": "ورزش",
+      "icon": "sports_soccer",
+      "order": 29
+    },
+    {
+      "id": "upload",
+      "title": "آپلود فایل",
+      "icon": "cloud_upload",
+      "order": 30
+    },
+    {
+      "id": "classifieds",
+      "title": "نیازمندی‌ها",
+      "icon": "view_list",
+      "order": 31
+    },
+    {
+      "id": "utilities",
+      "title": "خدمات آنلاین کاربردی",
+      "icon": "construction",
+      "order": 32
+    },
+    {
+      "id": "other",
+      "title": "سایر خدمات",
+      "icon": "apps",
+      "order": 99
+    }
   ]
 }
