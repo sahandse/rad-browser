@@ -25,6 +25,12 @@ class HomePage extends ConsumerWidget {
     final value = input.trim();
     if (value.isEmpty) return;
 
+    final mode = ref.read(networkModeProvider).valueOrNull;
+    if (!UrlUtils.looksLikeUrl(value) && mode == NetworkMode.internalOnly) {
+      _openIranDirectory(context, initialQuery: value);
+      return;
+    }
+
     final target = UrlUtils.looksLikeUrl(value)
         ? value
         : ref.read(settingsProvider).searchEngine.searchUri(value).toString();
@@ -34,9 +40,14 @@ class HomePage extends ConsumerWidget {
     );
   }
 
-  void _openIranDirectory(BuildContext context) {
+  void _openIranDirectory(
+    BuildContext context, {
+    String initialQuery = '',
+  }) {
     Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => const IranDirectoryPage()),
+      MaterialPageRoute<void>(
+        builder: (_) => IranDirectoryPage(initialQuery: initialQuery),
+      ),
     );
   }
 
