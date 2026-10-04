@@ -44,7 +44,6 @@ class _RadSearchResultsPageState extends State<RadSearchResultsPage> {
   bool _suggestionsLoading = false;
   bool _showSuggestions = false;
   String? _error;
-  RadSearchEngine? _usedEngine;
   _SearchSection _section = _SearchSection.all;
   int _generation = 0;
   int _visibleResults = 20;
@@ -154,7 +153,6 @@ class _RadSearchResultsPageState extends State<RadSearchResultsPage> {
       _related = const [];
       _knowledge = null;
       _answer = _smartService.answerBox(value);
-      _usedEngine = null;
       _visibleResults = 20;
       _page = 0;
       _hasMore = true;
@@ -171,7 +169,6 @@ class _RadSearchResultsPageState extends State<RadSearchResultsPage> {
       final ranked = _smartService.rankResults(value, response.results);
       setState(() {
         _results = ranked;
-        _usedEngine = response.usedEngine;
         _loading = false;
         _error = ranked.isEmpty
             ? 'نتیجه‌ای پیدا نشد. اتصال اینترنت را بررسی کنید و دوباره تلاش کنید.'
@@ -277,16 +274,6 @@ class _RadSearchResultsPageState extends State<RadSearchResultsPage> {
                 onChanged: (value) => setState(() => _section = value),
                 onIranWeb: _openIranWeb,
               ),
-              Expanded(
-                        child: Text(
-                          'نتایج با ${usedEngine.title} تکمیل شدند',
-                          textDirection: TextDirection.rtl,
-                          style: theme.textTheme.labelSmall?.copyWith(color: scheme.onSurfaceVariant),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               Expanded(
                 child: RefreshIndicator(
                   onRefresh: () => _search(_query),
