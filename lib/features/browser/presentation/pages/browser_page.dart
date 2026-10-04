@@ -21,6 +21,7 @@ import '../../../permissions/presentation/pages/site_permissions_page.dart';
 import '../../../permissions/presentation/widgets/site_permission_prompt.dart';
 import '../../../privacy/domain/tracker_blocker.dart';
 import '../../../reader/presentation/pages/reader_page.dart';
+import '../../../search/presentation/pages/search_results_page.dart';
 import '../../../settings/domain/app_settings.dart';
 import '../../../settings/presentation/controllers/settings_controller.dart';
 import '../../../settings/presentation/pages/settings_page.dart';
@@ -173,8 +174,19 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
   }
 
   Future<void> _navigate(String value) async {
-    if (value.trim().isEmpty) return;
-    final uri = _resolveInput(value);
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) return;
+    if (!UrlUtils.looksLikeUrl(trimmed)) {
+      FocusManager.instance.primaryFocus?.unfocus();
+      final engine = ref.read(settingsProvider).searchEngine;
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => RadSearchResultsPage(query: trimmed, engine: engine),
+        ),
+      );
+      return;
+    }
+    final uri = _resolveInput(trimmed);
     FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
       _currentUri = uri;
