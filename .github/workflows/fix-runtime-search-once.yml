@@ -1,0 +1,34 @@
+name: One-time runtime search reliability fix
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-runtime-search-once.yml'
+      - 'tool/fix_runtime_search.py'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply runtime search fix
+        run: python3 tool/fix_runtime_search.py
+      - name: Commit runtime search fix
+        run: |
+          if git diff --quiet; then
+            echo 'No changes needed.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add \
+            lib/features/network/data/network_probe_service.dart \
+            lib/features/search/data/rad_search_service.dart \
+            pubspec.yaml CHANGELOG.md
+          git commit -m 'fix: make runtime search resilient'
+          git push origin HEAD:main
