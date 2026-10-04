@@ -46,7 +46,13 @@ final searchSuggestionsProvider =
 
   final directory = ref.watch(iranDirectoryProvider).valueOrNull ?? const <IranSite>[];
   for (final site in directory) {
-    final haystack = [site.name, site.url.host, ...site.keywords].join(' ').toLowerCase();
+    final haystack = [
+      site.name,
+      site.url.host,
+      site.description,
+      ...site.keywords,
+      ...site.features,
+    ].join(' ').toLowerCase();
     if (haystack.contains(q) &&
         !suggestions.any((suggestion) => suggestion.url == site.url)) {
       suggestions.add(
