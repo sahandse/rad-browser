@@ -13,13 +13,8 @@ import '../../../iran_directory/presentation/pages/iran_directory_page.dart';
 import '../../../network/domain/network_mode.dart';
 import '../../../network/presentation/network_providers.dart';
 import '../../../offline/presentation/pages/offline_pages_page.dart';
-import '../../../settings/domain/app_settings.dart';
 import '../../../settings/presentation/controllers/settings_controller.dart';
 import '../../../settings/presentation/pages/settings_page.dart';
-import '../widgets/internal_network_card.dart';
-import '../widgets/network_status_chip.dart';
-import '../widgets/offline_mode_card.dart';
-import '../widgets/rad_search_bar.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -75,9 +70,7 @@ class HomePage extends ConsumerWidget {
         _openDirect(context, 'https://zarebin.ir/');
         if (query.isNotEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('عبارت کپی شد؛ در ذره‌بین جای‌گذاری کنید'),
-            ),
+            const SnackBar(content: Text('عبارت کپی شد؛ در ذره‌بین جای‌گذاری کنید')),
           );
         }
         return true;
@@ -138,213 +131,75 @@ class HomePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final network = ref.watch(networkModeProvider);
-    final mode = network.valueOrNull;
-    final internalOnly = mode == NetworkMode.internalOnly;
-    final offline = mode == NetworkMode.offline;
+    final mode = ref.watch(networkModeProvider).valueOrNull;
     final tabCount = ref.watch(browserTabsProvider).length;
 
     return Scaffold(
       backgroundColor: scheme.surface,
       body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 36),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 720),
-              child: Column(
-                children: [
-                  Row(
+        child: Stack(
+          children: [
+            Positioned(
+              top: 10,
+              left: 12,
+              child: IconButton(
+                tooltip: 'منو',
+                onPressed: () => _showHomeMenu(context),
+                icon: const Icon(Icons.more_horiz_rounded),
+              ),
+            ),
+            Positioned(
+              top: 14,
+              right: 16,
+              child: _MinimalNetworkStatus(mode: mode),
+            ),
+            Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(24, 84, 24, 110),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 620),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      IconButton.filledTonal(
-                        tooltip: 'منو',
-                        onPressed: () => _showHomeMenu(context),
-                        icon: const Icon(Icons.more_horiz_rounded),
+                      const _RadLogo(),
+                      const SizedBox(height: 38),
+                      _GoogleLikeSearchBox(
+                        hint: mode == NetworkMode.internalOnly
+                            ? 'جستجو در وب داخلی ایران'
+                            : mode == NetworkMode.offline
+                                ? 'جستجو یا نشانی ذخیره‌شده'
+                                : 'جستجو یا وارد کردن نشانی وب',
+                        onSubmitted: (value) => _openBrowser(context, ref, value),
                       ),
-                      const Spacer(),
+                      const SizedBox(height: 14),
                       AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 240),
-                        child: mode == null
-                            ? const _NetworkCheckingChip()
-                            : NetworkStatusChip(key: ValueKey(mode), mode: mode),
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: MediaQuery.sizeOf(context).height < 700 ? 48 : 78,
-                  ),
-                  _RadMark(theme: theme),
-                  const SizedBox(height: 34),
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 240),
-                    child: internalOnly
-                        ? Container(
-                            key: const ValueKey('internal-title'),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 7,
-                            ),
-                            decoration: BoxDecoration(
-                              color: scheme.primaryContainer.withValues(alpha: .55),
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-                            child: Text(
-                              'شبکه داخلی فعال است',
-                              textDirection: TextDirection.rtl,
-                              style: theme.textTheme.labelLarge?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: scheme.onPrimaryContainer,
-                              ),
-                            ),
-                          )
-                        : const SizedBox.shrink(key: ValueKey('normal-title')),
-                  ),
-                  if (internalOnly) const SizedBox(height: 14),
-                  RadSearchBar(
-                    onSubmitted: (value) => _openBrowser(context, ref, value),
-                  ),
-                  if (internalOnly) ...[
-                    const SizedBox(height: 16),
-                    InternalNetworkCard(
-                      onOpenZarebin: () => _openDirect(
-                        context,
-                        'https://zarebin.ir/',
-                      ),
-                      onOpenDirectory: () => _openIranDirectory(context),
-                    ),
-                    const SizedBox(height: 12),
-                    _EmergencyShortcuts(
-                      onOpen: (query) =>
-                          _openIranDirectory(context, initialQuery: query),
-                      onFilmCase: () =>
-                          _openDirect(context, 'https://filmcase.ir/'),
-                      onNoraaShop: () =>
-                          _openDirect(context, 'https://noraashop.ir/'),
-                    ),
-                  ],
-                  if (offline) ...[
-                    const SizedBox(height: 16),
-                    OfflineModeCard(
-                      onOpenOfflinePages: () => _openOfflinePages(context),
-                      onOpenBookmarks: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => const BookmarksPage(),
-                        ),
-                      ),
-                      onOpenIranDirectory: () => _openIranDirectory(context),
-                    ),
-                  ],
-                  const SizedBox(height: 26),
-                  Wrap(
-                    alignment: WrapAlignment.center,
-                    spacing: 10,
-                    runSpacing: 8,
-                    children: [
-                      _HomeAction(
-                        icon: Icons.language_rounded,
-                        label: 'ایران وب',
-                        onTap: () => _openIranDirectory(context),
-                      ),
-                      _HomeAction(
-                        icon: Icons.offline_pin_outlined,
-                        label: 'آفلاین',
-                        onTap: () => _openOfflinePages(context),
-                      ),
-                      _HomeAction(
-                        icon: Icons.star_border_rounded,
-                        label: 'نشانک‌ها',
-                        onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => const BookmarksPage(),
-                          ),
-                        ),
-                      ),
-                      _HomeAction(
-                        icon: Icons.history_rounded,
-                        label: 'تاریخچه',
-                        onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => const HistoryPage(),
-                          ),
-                        ),
-                      ),
-                      _HomeAction(
-                        icon: Icons.download_rounded,
-                        label: 'دانلودها',
-                        onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => const DownloadsPage(),
-                          ),
+                        duration: const Duration(milliseconds: 220),
+                        child: _ModeHint(
+                          key: ValueKey(mode),
+                          mode: mode,
+                          onIranWeb: () => _openIranDirectory(context),
+                          onOffline: () => _openOfflinePages(context),
                         ),
                       ),
                     ],
                   ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        minimum: const EdgeInsets.only(bottom: 10),
-        child: Center(
-          heightFactor: 1,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 250),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: scheme.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(30),
-                border: Border.all(
-                  color: scheme.outlineVariant.withValues(alpha: .48),
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: .05),
-                    blurRadius: 18,
-                    offset: const Offset(0, 7),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Container(
-                    width: 42,
-                    height: 42,
-                    decoration: BoxDecoration(
-                      color: scheme.primaryContainer,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.home_rounded,
-                      size: 21,
-                      color: scheme.onPrimaryContainer,
-                    ),
-                  ),
-                  Badge(
-                    isLabelVisible: tabCount > 0,
-                    label: Text('$tabCount'),
-                    child: IconButton(
-                      tooltip: 'تب‌ها',
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(builder: (_) => const TabsPage()),
-                      ),
-                      icon: const Icon(Icons.crop_square_rounded),
-                    ),
-                  ),
-                  IconButton(
-                    tooltip: 'منو',
-                    onPressed: () => _showHomeMenu(context),
-                    icon: const Icon(Icons.menu_rounded),
-                  ),
-                ],
               ),
             ),
-          ),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 14,
+              child: Center(
+                child: _TabsButton(
+                  count: tabCount,
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(builder: (_) => const TabsPage()),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -353,236 +208,160 @@ class HomePage extends ConsumerWidget {
   Future<void> _showHomeMenu(BuildContext context) async {
     await showModalBottomSheet<void>(
       context: context,
+      showDragHandle: true,
       builder: (sheetContext) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.language_rounded),
-                title: const Text('ایران وب'),
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  _openIranDirectory(context);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.offline_pin_outlined),
-                title: const Text('مطالعه آفلاین'),
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  _openOfflinePages(context);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.star_border_rounded),
-                title: const Text('نشانک‌ها'),
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(builder: (_) => const BookmarksPage()),
-                  );
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.history_rounded),
-                title: const Text('تاریخچه'),
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(builder: (_) => const HistoryPage()),
-                  );
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.download_rounded),
-                title: const Text('دانلودها'),
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(builder: (_) => const DownloadsPage()),
-                  );
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.crop_square_rounded),
-                title: const Text('تب‌ها و گروه‌ها'),
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(builder: (_) => const TabsPage()),
-                  );
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.settings_outlined),
-                title: const Text('تنظیمات'),
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(builder: (_) => const SettingsPage()),
-                  );
-                },
-              ),
-            ],
-          ),
+        child: ListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.fromLTRB(12, 0, 12, 18),
+          children: [
+            ListTile(
+              leading: const Icon(Icons.language_rounded),
+              title: const Text('ایران وب'),
+              onTap: () {
+                Navigator.pop(sheetContext);
+                _openIranDirectory(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.travel_explore_rounded),
+              title: const Text('ذره‌بین'),
+              onTap: () {
+                Navigator.pop(sheetContext);
+                _openDirect(context, 'https://zarebin.ir/');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.offline_pin_outlined),
+              title: const Text('صفحات آفلاین'),
+              onTap: () {
+                Navigator.pop(sheetContext);
+                _openOfflinePages(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.star_border_rounded),
+              title: const Text('نشانک‌ها'),
+              onTap: () {
+                Navigator.pop(sheetContext);
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(builder: (_) => const BookmarksPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.history_rounded),
+              title: const Text('تاریخچه'),
+              onTap: () {
+                Navigator.pop(sheetContext);
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(builder: (_) => const HistoryPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.download_rounded),
+              title: const Text('دانلودها'),
+              onTap: () {
+                Navigator.pop(sheetContext);
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(builder: (_) => const DownloadsPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.crop_square_rounded),
+              title: const Text('تب‌ها و گروه‌ها'),
+              onTap: () {
+                Navigator.pop(sheetContext);
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(builder: (_) => const TabsPage()),
+                );
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.settings_outlined),
+              title: const Text('تنظیمات'),
+              onTap: () {
+                Navigator.pop(sheetContext);
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(builder: (_) => const SettingsPage()),
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _EmergencyShortcuts extends StatelessWidget {
-  const _EmergencyShortcuts({
-    required this.onOpen,
-    required this.onFilmCase,
-    required this.onNoraaShop,
-  });
-
-  final ValueChanged<String> onOpen;
-  final VoidCallback onFilmCase;
-  final VoidCallback onNoraaShop;
+class _RadLogo extends StatelessWidget {
+  const _RadLogo();
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: scheme.outlineVariant.withValues(alpha: .45),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            'دسترسی سریع داخلی',
-            textDirection: TextDirection.rtl,
-            style: theme.textTheme.labelLarge?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Wrap(
-            spacing: 7,
-            runSpacing: 7,
-            children: [
-              _EmergencyChip(label: 'بانک', onTap: () => onOpen('بانک')),
-              _EmergencyChip(label: 'دولت', onTap: () => onOpen('دولت')),
-              _EmergencyChip(label: 'خبر', onTap: () => onOpen('خبر')),
-              _EmergencyChip(label: 'نقشه', onTap: () => onOpen('نقشه')),
-              _EmergencyChip(label: 'اپراتور', onTap: () => onOpen('اپراتور')),
-              _EmergencyChip(label: 'فیلم‌کیس', onTap: onFilmCase),
-              _EmergencyChip(label: 'نورا شاپ', onTap: onNoraaShop),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
 
-class _EmergencyChip extends StatelessWidget {
-  const _EmergencyChip({required this.label, required this.onTap});
-
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return ActionChip(
-      label: Text(label, textDirection: TextDirection.rtl),
-      onPressed: onTap,
-      visualDensity: VisualDensity.compact,
-    );
-  }
-}
-
-class _NetworkCheckingChip extends StatelessWidget {
-  const _NetworkCheckingChip();
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Container(
-      height: 32,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest.withValues(alpha: .55),
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            width: 12,
-            height: 12,
-            child: CircularProgressIndicator(
-              strokeWidth: 1.7,
-              color: scheme.primary,
-            ),
-          ),
-          const SizedBox(width: 8),
-          const Text('بررسی شبکه', textDirection: TextDirection.rtl),
-        ],
-      ),
-    );
-  }
-}
-
-class _RadMark extends StatelessWidget {
-  const _RadMark({required this.theme});
-
-  final ThemeData theme;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = theme.colorScheme;
     return Column(
       children: [
         Container(
-          width: 70,
-          height: 70,
+          width: 108,
+          height: 108,
           decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(34),
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [scheme.primary, scheme.primary.withValues(alpha: .70)],
+              colors: [
+                scheme.primary,
+                scheme.primary.withValues(alpha: .72),
+              ],
             ),
-            borderRadius: BorderRadius.circular(23),
             boxShadow: [
               BoxShadow(
                 color: scheme.primary.withValues(alpha: .18),
-                blurRadius: 30,
-                offset: const Offset(0, 12),
+                blurRadius: 34,
+                offset: const Offset(0, 14),
               ),
             ],
           ),
-          alignment: Alignment.center,
-          child: const Text(
-            'R',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 38,
-              height: 1,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -2,
-            ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              const Text(
+                'R',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 58,
+                  height: 1,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -3,
+                ),
+              ),
+              Positioned(
+                right: 20,
+                bottom: 18,
+                child: Container(
+                  width: 11,
+                  height: 11,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: .92),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 18),
         Text(
           'راد',
           textDirection: TextDirection.rtl,
-          style: theme.textTheme.headlineSmall?.copyWith(
+          style: theme.textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.w800,
-            letterSpacing: -.4,
+            letterSpacing: -.8,
           ),
         ),
       ],
@@ -590,46 +369,171 @@ class _RadMark extends StatelessWidget {
   }
 }
 
-class _HomeAction extends StatelessWidget {
-  const _HomeAction({
-    required this.icon,
-    required this.label,
-    required this.onTap,
+class _GoogleLikeSearchBox extends StatefulWidget {
+  const _GoogleLikeSearchBox({
+    required this.hint,
+    required this.onSubmitted,
   });
 
-  final IconData icon;
-  final String label;
+  final String hint;
+  final ValueChanged<String> onSubmitted;
+
+  @override
+  State<_GoogleLikeSearchBox> createState() => _GoogleLikeSearchBoxState();
+}
+
+class _GoogleLikeSearchBoxState extends State<_GoogleLikeSearchBox> {
+  late final TextEditingController _controller;
+  late final FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+    _focusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      height: 60,
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(
+          color: scheme.outlineVariant.withValues(alpha: .62),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: .045),
+            blurRadius: 18,
+            offset: const Offset(0, 7),
+          ),
+        ],
+      ),
+      child: TextField(
+        controller: _controller,
+        focusNode: _focusNode,
+        textInputAction: TextInputAction.search,
+        keyboardType: TextInputType.url,
+        autocorrect: false,
+        enableSuggestions: false,
+        onSubmitted: widget.onSubmitted,
+        decoration: InputDecoration(
+          hintText: widget.hint,
+          prefixIcon: const Icon(Icons.search_rounded, size: 23),
+          suffixIcon: IconButton(
+            tooltip: 'برو',
+            onPressed: () => widget.onSubmitted(_controller.text),
+            icon: const Icon(Icons.arrow_forward_rounded),
+          ),
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 18),
+        ),
+      ),
+    );
+  }
+}
+
+class _MinimalNetworkStatus extends StatelessWidget {
+  const _MinimalNetworkStatus({required this.mode});
+
+  final NetworkMode? mode;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final (label, icon) = switch (mode) {
+      NetworkMode.fullInternet => ('اینترنت', Icons.circle),
+      NetworkMode.internalOnly => ('شبکه داخلی', Icons.public_rounded),
+      NetworkMode.offline => ('آفلاین', Icons.cloud_off_rounded),
+      null => ('بررسی شبکه', Icons.more_horiz_rounded),
+    };
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerLow.withValues(alpha: .82),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 11, color: scheme.primary),
+          const SizedBox(width: 6),
+          Text(label, style: Theme.of(context).textTheme.labelSmall),
+        ],
+      ),
+    );
+  }
+}
+
+class _ModeHint extends StatelessWidget {
+  const _ModeHint({
+    super.key,
+    required this.mode,
+    required this.onIranWeb,
+    required this.onOffline,
+  });
+
+  final NetworkMode? mode;
+  final VoidCallback onIranWeb;
+  final VoidCallback onOffline;
+
+  @override
+  Widget build(BuildContext context) {
+    return switch (mode) {
+      NetworkMode.internalOnly => TextButton.icon(
+          onPressed: onIranWeb,
+          icon: const Icon(Icons.language_rounded, size: 17),
+          label: const Text('اینترنت بین‌الملل در دسترس نیست — جستجو در ایران وب'),
+        ),
+      NetworkMode.offline => TextButton.icon(
+          onPressed: onOffline,
+          icon: const Icon(Icons.offline_pin_outlined, size: 17),
+          label: const Text('آفلاین — باز کردن صفحات ذخیره‌شده'),
+        ),
+      _ => const SizedBox(height: 40),
+    };
+  }
+}
+
+class _TabsButton extends StatelessWidget {
+  const _TabsButton({required this.count, required this.onTap});
+
+  final int count;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 7),
-        child: Column(
-          children: [
-            Container(
-              width: 46,
-              height: 46,
-              decoration: BoxDecoration(
-                color: scheme.surfaceContainerHighest.withValues(alpha: .60),
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: scheme.outlineVariant.withValues(alpha: .35),
-                ),
-              ),
-              child: Icon(icon, size: 21),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              textDirection: TextDirection.rtl,
-              style: Theme.of(context).textTheme.labelMedium,
-            ),
-          ],
+    return Material(
+      color: scheme.surfaceContainerLow.withValues(alpha: .94),
+      borderRadius: BorderRadius.circular(24),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(24),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 9),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.crop_square_rounded, size: 18),
+              if (count > 0) ...[
+                const SizedBox(width: 7),
+                Text('$count'),
+              ],
+            ],
+          ),
         ),
       ),
     );
