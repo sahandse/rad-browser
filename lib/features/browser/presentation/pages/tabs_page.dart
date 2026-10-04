@@ -16,125 +16,221 @@ class TabsPage extends ConsumerWidget {
     return Scaffold(
       backgroundColor: scheme.surface,
       appBar: AppBar(
-        title: Text('تب‌ها (${tabs.length})', textDirection: TextDirection.rtl),
-        centerTitle: false,
+        title: Text(
+          tabs.isEmpty ? 'تب‌ها' : '${tabs.length} تب',
+          textDirection: TextDirection.rtl,
+        ),
         actions: [
           if (tabs.isNotEmpty)
-            TextButton(
+            TextButton.icon(
               onPressed: () => ref.read(browserTabsProvider.notifier).closeAll(),
-              child: const Text('بستن همه'),
+              icon: const Icon(Icons.close_rounded, size: 18),
+              label: const Text('بستن همه'),
             ),
           const SizedBox(width: 8),
         ],
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => Navigator.of(context).popUntil((route) => route.isFirst),
+        icon: const Icon(Icons.add_rounded),
+        label: const Text('تب جدید'),
+      ),
       body: tabs.isEmpty
           ? Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.tab_unselected_rounded, size: 42, color: scheme.onSurfaceVariant),
-                  const SizedBox(height: 14),
-                  Text(
-                    'تبی باز نیست',
-                    textDirection: TextDirection.rtl,
-                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-                  ),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 70),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 72,
+                      height: 72,
+                      decoration: BoxDecoration(
+                        color: scheme.surfaceContainerHighest,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.tab_unselected_rounded,
+                        size: 30,
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    Text(
+                      'تبی باز نیست',
+                      textDirection: TextDirection.rtl,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'یک تب جدید باز کنید و مرور را شروع کنید.',
+                      textDirection: TextDirection.rtl,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             )
           : LayoutBuilder(
               builder: (context, constraints) {
-                final columns = constraints.maxWidth >= 900
+                final columns = constraints.maxWidth >= 1100
                     ? 4
-                    : constraints.maxWidth >= 600
+                    : constraints.maxWidth >= 720
                         ? 3
                         : 2;
                 return GridView.builder(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: columns,
                     crossAxisSpacing: 12,
                     mainAxisSpacing: 12,
-                    childAspectRatio: .78,
+                    childAspectRatio: constraints.maxWidth < 420 ? .92 : 1.08,
                   ),
                   itemCount: tabs.length,
                   itemBuilder: (context, index) {
                     final tab = tabs[index];
-                    return Material(
-                      color: scheme.surfaceContainerLow,
-                      borderRadius: BorderRadius.circular(22),
-                      clipBehavior: Clip.antiAlias,
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute<void>(
-                              builder: (_) => BrowserPage(
-                                initialInput: tab.url.toString(),
-                                existingTabId: tab.id,
-                              ),
+                    return _TabCard(
+                      title: tab.title,
+                      host: tab.url.host,
+                      loading: tab.isLoading,
+                      progress: tab.progress,
+                      onTap: () {
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute<void>(
+                            builder: (_) => BrowserPage(
+                              initialInput: tab.url.toString(),
+                              existingTabId: tab.id,
                             ),
-                          );
-                        },
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Expanded(
-                              child: Container(
-                                color: scheme.surfaceContainerHighest.withValues(alpha: .6),
-                                alignment: Alignment.center,
-                                child: Icon(
-                                  Icons.language_rounded,
-                                  size: 42,
-                                  color: scheme.onSurfaceVariant.withValues(alpha: .72),
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(12, 9, 6, 9),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          tab.title,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: theme.textTheme.labelLarge?.copyWith(
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 3),
-                                        Text(
-                                          tab.url.host,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: theme.textTheme.labelSmall?.copyWith(
-                                            color: scheme.onSurfaceVariant,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  IconButton(
-                                    tooltip: 'بستن تب',
-                                    onPressed: () => ref
-                                        .read(browserTabsProvider.notifier)
-                                        .close(tab.id),
-                                    icon: const Icon(Icons.close_rounded, size: 19),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                          ),
+                        );
+                      },
+                      onClose: () => ref
+                          .read(browserTabsProvider.notifier)
+                          .close(tab.id),
                     );
                   },
                 );
               },
             ),
+    );
+  }
+}
+
+class _TabCard extends StatelessWidget {
+  const _TabCard({
+    required this.title,
+    required this.host,
+    required this.loading,
+    required this.progress,
+    required this.onTap,
+    required this.onClose,
+  });
+
+  final String title;
+  final String host;
+  final bool loading;
+  final double progress;
+  final VoidCallback onTap;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final initial = host.isEmpty ? 'R' : host.characters.first.toUpperCase();
+
+    return Material(
+      color: scheme.surfaceContainerLow,
+      borderRadius: BorderRadius.circular(24),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: scheme.outlineVariant.withValues(alpha: .42),
+            ),
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(14, 14, 8, 8),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 34,
+                      height: 34,
+                      decoration: BoxDecoration(
+                        color: scheme.primaryContainer,
+                        shape: BoxShape.circle,
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        initial,
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: scheme.onPrimaryContainer,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      tooltip: 'بستن تب',
+                      visualDensity: VisualDensity.compact,
+                      onPressed: onClose,
+                      icon: const Icon(Icons.close_rounded, size: 19),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 8, 14, 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          height: 1.35,
+                        ),
+                      ),
+                      const SizedBox(height: 7),
+                      Text(
+                        host,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                height: loading ? 3 : 0,
+                child: loading
+                    ? LinearProgressIndicator(
+                        value: progress > 0 && progress < 1 ? progress : null,
+                      )
+                    : null,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
