@@ -34,12 +34,13 @@ class BrowserTabsController extends StateNotifier<List<BrowserTab>> {
     _loaded = true;
   }
 
-  String open(Uri url) {
+  String open(Uri url, {String? groupId}) {
     final id = DateTime.now().microsecondsSinceEpoch.toString();
     final tab = BrowserTab(
       id: id,
       url: url,
       title: url.host.isEmpty ? 'تب جدید' : url.host,
+      groupId: groupId,
       isLoading: true,
     );
     state = [...state, tab];
@@ -67,6 +68,22 @@ class BrowserTabsController extends StateNotifier<List<BrowserTab>> {
           )
         else
           tab,
+    ];
+    unawaited(_persist());
+  }
+
+  void moveToGroup(String id, String? groupId) {
+    state = [
+      for (final tab in state)
+        if (tab.id == id) tab.withGroup(groupId) else tab,
+    ];
+    unawaited(_persist());
+  }
+
+  void removeGroupMembership(String groupId) {
+    state = [
+      for (final tab in state)
+        if (tab.groupId == groupId) tab.withGroup(null) else tab,
     ];
     unawaited(_persist());
   }
