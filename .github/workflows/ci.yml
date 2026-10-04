@@ -27,7 +27,7 @@ jobs:
           fi
           rm -f test/widget_test.dart
 
-      - name: Configure Android package and permissions
+      - name: Configure Android package, branding and permissions
         run: python3 tool/configure_android.py
 
       - name: Install dependencies
@@ -44,16 +44,22 @@ jobs:
             echo "No project tests yet; skipping flutter test."
           fi
 
-      - name: Build Android APK
+      - name: Build Android debug APK
         run: flutter build apk --debug
 
-      - name: Audit Android manifest
+      - name: Build Android release candidates
         run: |
-          unzip -p build/app/outputs/flutter-apk/app-debug.apk AndroidManifest.xml > /tmp/rad-manifest.bin
+          flutter build apk --release
+          flutter build appbundle --release
+
+      - name: Audit Android release manifest
+        run: |
+          unzip -p build/app/outputs/flutter-apk/app-release.apk AndroidManifest.xml > /tmp/rad-manifest.bin
           strings -el /tmp/rad-manifest.bin > /tmp/rad-manifest.txt
           grep -q 'com.sahand.rad' /tmp/rad-manifest.txt
+          grep -q 'android.permission.INTERNET' /tmp/rad-manifest.txt
           if grep -Eq 'android.permission.(READ_EXTERNAL_STORAGE|WRITE_EXTERNAL_STORAGE|REQUEST_INSTALL_PACKAGES)' /tmp/rad-manifest.txt; then
-            echo 'Forbidden Android permission found in merged manifest.'
+            echo 'Forbidden Android permission found in merged release manifest.'
             grep -E 'android.permission.(READ_EXTERNAL_STORAGE|WRITE_EXTERNAL_STORAGE|REQUEST_INSTALL_PACKAGES)' /tmp/rad-manifest.txt
             exit 1
           fi
@@ -61,11 +67,21 @@ jobs:
       - name: Build Web release
         run: flutter build web --release
 
-      - name: Upload Android build
+      - name: Upload Android debug build
         uses: actions/upload-artifact@v4
         with:
           name: rad-android-debug
           path: build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload Android release candidates
+        uses: actions/upload-artifact@v4
+        with:
+          name: rad-android-release-candidate-unsigned-for-publish
+          path: |
+            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error
           retention-days: 7
 
