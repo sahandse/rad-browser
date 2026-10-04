@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-04T05:02:00Z",
+  "updatedAt": "2026-10-04T05:04:00Z",
   "sites": [
     {
       "id": "zarebin",
@@ -21,6 +21,26 @@
       "verified": true,
       "internalNetwork": false,
       "priority": 100
+    },
+    {
+      "id": "aparat",
+      "name": "آپارات",
+      "url": "https://www.aparat.com/",
+      "category": "video",
+      "keywords": ["آپارات", "ویدیو", "فیلم", "ویدئو", "اشتراک ویدیو"],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 95
+    },
+    {
+      "id": "digikala",
+      "name": "دیجی‌کالا",
+      "url": "https://www.digikala.com/",
+      "category": "shopping",
+      "keywords": ["دیجی کالا", "دیجی‌کالا", "فروشگاه", "خرید", "کالا"],
+      "verified": true,
+      "internalNetwork": false,
+      "priority": 92
     },
     {
       "id": "irna",
