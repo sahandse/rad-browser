@@ -14,10 +14,10 @@ import '../../../iran_directory/presentation/pages/iran_directory_page.dart';
 import '../../../network/domain/network_mode.dart';
 import '../../../network/presentation/network_providers.dart';
 import '../../../offline/presentation/pages/offline_pages_page.dart';
+import '../../../search/domain/automatic_search_engine.dart';
 import '../../../search/presentation/pages/search_results_page.dart';
 import '../../../search/presentation/widgets/rad_suggesting_search_box.dart';
 import '../../../settings/domain/app_settings.dart';
-import '../../../settings/presentation/controllers/settings_controller.dart';
 import '../../../settings/presentation/pages/settings_page.dart';
 
 class HomePage extends ConsumerWidget {
@@ -37,7 +37,8 @@ class HomePage extends ConsumerWidget {
       if (!context.mounted) return;
     }
 
-    final mode = ref.read(networkModeProvider).valueOrNull;
+    final mode = ref.read(networkModeProvider).valueOrNull ??
+        await ref.read(networkProbeServiceProvider).check();
     if (UrlUtils.looksLikeUrl(value)) {
       Navigator.of(context).push(
         MaterialPageRoute<void>(builder: (_) => BrowserPage(initialInput: value)),
@@ -45,12 +46,12 @@ class HomePage extends ConsumerWidget {
       return;
     }
 
-    if (mode == NetworkMode.internalOnly || mode == NetworkMode.offline) {
+    final engine = automaticSearchEngine(mode);
+    if (engine == null) {
       _openIranDirectory(context, initialQuery: value);
       return;
     }
 
-    final engine = ref.read(settingsProvider).searchEngine;
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => RadSearchResultsPage(query: value, engine: engine),
@@ -143,7 +144,6 @@ class HomePage extends ConsumerWidget {
     final scheme = theme.colorScheme;
     final mode = ref.watch(networkModeProvider).valueOrNull;
     final tabCount = ref.watch(browserTabsProvider).length;
-    final settings = ref.watch(settingsProvider);
 
     return Scaffold(
       backgroundColor: scheme.surface,
@@ -185,14 +185,6 @@ class HomePage extends ConsumerWidget {
                                 : 'جستجو یا وارد کردن آدرس',
                         onSubmitted: (value) => _openInput(context, ref, value),
                       ),
-                      const SizedBox(height: 14),
-                      if (mode == NetworkMode.fullInternet || mode == null)
-                        _SearchEngineSelector(
-                          selected: settings.searchEngine,
-                          onChanged: (engine) => ref
-                              .read(settingsProvider.notifier)
-                              .setSearchEngine(engine),
-                        ),
                       const SizedBox(height: 10),
                       AnimatedSwitcher(
                         duration: const Duration(milliseconds: 220),
@@ -356,91 +348,6 @@ class _GlowCircle extends StatelessWidget {
         shape: BoxShape.circle,
         gradient: RadialGradient(
           colors: [color, color.withValues(alpha: 0)],
-        ),
-      ),
-    );
-  }
-}
-
-class _SearchEngineSelector extends StatelessWidget {
-  const _SearchEngineSelector({
-    required this.selected,
-    required this.onChanged,
-  });
-
-  final RadSearchEngine selected;
-  final ValueChanged<RadSearchEngine> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final normalized = selected == RadSearchEngine.zarebin
-        ? RadSearchEngine.zarebin
-        : RadSearchEngine.google;
-    return Container(
-      padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerLow.withValues(alpha: .8),
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _EngineSegment(
-            label: 'Google',
-            selected: normalized == RadSearchEngine.google,
-            onTap: () => onChanged(RadSearchEngine.google),
-          ),
-          _EngineSegment(
-            label: 'ذره‌بین',
-            selected: normalized == RadSearchEngine.zarebin,
-            onTap: () => onChanged(RadSearchEngine.zarebin),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _EngineSegment extends StatelessWidget {
-  const _EngineSegment({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return InkWell(
-      borderRadius: BorderRadius.circular(15),
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 160),
-        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 6),
-        decoration: BoxDecoration(
-          color: selected ? scheme.surface : Colors.transparent,
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: selected
-              ? [
-                  BoxShadow(
-                    color: scheme.shadow.withValues(alpha: .06),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : null,
-        ),
-        child: Text(
-          label,
-          style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                color: selected ? scheme.onSurface : scheme.onSurfaceVariant,
-              ),
         ),
       ),
     );

@@ -11,6 +11,7 @@ import '../../../downloads/presentation/controllers/downloads_controller.dart';
 import '../../../downloads/presentation/pages/downloads_page.dart';
 import '../../../history/presentation/controllers/history_controller.dart';
 import '../../../history/presentation/pages/history_page.dart';
+import '../../../iran_directory/presentation/pages/iran_directory_page.dart';
 import '../../../network/domain/network_mode.dart';
 import '../../../network/presentation/network_providers.dart';
 import '../../../offline/presentation/controllers/offline_pages_controller.dart';
@@ -21,6 +22,7 @@ import '../../../permissions/presentation/pages/site_permissions_page.dart';
 import '../../../permissions/presentation/widgets/site_permission_prompt.dart';
 import '../../../privacy/domain/tracker_blocker.dart';
 import '../../../reader/presentation/pages/reader_page.dart';
+import '../../../search/domain/automatic_search_engine.dart';
 import '../../../search/presentation/pages/search_results_page.dart';
 import '../../../settings/domain/app_settings.dart';
 import '../../../settings/presentation/controllers/settings_controller.dart';
@@ -91,7 +93,11 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
       }
       return uri;
     }
-    return settings.searchEngine.searchUri(value);
+    final mode = ref.read(networkModeProvider).valueOrNull;
+    final engine = mode == NetworkMode.internalOnly
+        ? RadSearchEngine.zarebin
+        : RadSearchEngine.google;
+    return engine.searchUri(value);
   }
 
   @override
@@ -178,7 +184,17 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
     if (trimmed.isEmpty) return;
     if (!UrlUtils.looksLikeUrl(trimmed)) {
       FocusManager.instance.primaryFocus?.unfocus();
-      final engine = ref.read(settingsProvider).searchEngine;
+      final mode = ref.read(networkModeProvider).valueOrNull ??
+          await ref.read(networkProbeServiceProvider).check();
+      final engine = automaticSearchEngine(mode);
+      if (engine == null) {
+        await Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => IranDirectoryPage(initialQuery: trimmed),
+          ),
+        );
+        return;
+      }
       await Navigator.of(context).push(
         MaterialPageRoute<void>(
           builder: (_) => RadSearchResultsPage(query: trimmed, engine: engine),

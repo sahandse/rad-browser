@@ -88,13 +88,9 @@ class RadSearchService {
     final order = switch (engine) {
       RadSearchEngine.google => const [
           RadSearchEngine.google,
-          RadSearchEngine.duckDuckGo,
-          RadSearchEngine.bing,
         ],
       RadSearchEngine.zarebin => const [
           RadSearchEngine.zarebin,
-          RadSearchEngine.google,
-          RadSearchEngine.duckDuckGo,
         ],
       RadSearchEngine.bing => const [
           RadSearchEngine.bing,
@@ -185,7 +181,7 @@ class RadSearchService {
     final uri = Uri.https('www.google.com', '/search', {
       'q': query,
       'hl': 'fa',
-      'num': '30',
+      'num': '50',
       'filter': '0',
     });
     final response = await _client.get(uri, headers: _headers);
@@ -204,7 +200,7 @@ class RadSearchService {
       final snippet = _snippet(container, title);
       seen.add(url);
       results.add(RadSearchItem(title: title, url: url, snippet: snippet));
-      if (results.length >= 30) break;
+      if (results.length >= 50) break;
     }
     return results;
   }

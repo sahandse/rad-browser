@@ -1,23 +1,7 @@
 {
-  "version": 5,
+  "version": 6,
   "updatedAt": "2026-10-04T08:45:00Z",
   "sites": [
-    {
-      "id": "zarebin",
-      "name": "جستجوگر ذره‌بین",
-      "url": "https://zarebin.ir/",
-      "category": "search",
-      "keywords": [
-        "ذره بین",
-        "ذره‌بین",
-        "جستجو",
-        "جستجوگر ایرانی",
-        "موتور جستجو"
-      ],
-      "verified": true,
-      "internalNetwork": false,
-      "priority": 120
-    },
     {
       "id": "mygov",
       "name": "پنجره ملی خدمات دولت هوشمند",

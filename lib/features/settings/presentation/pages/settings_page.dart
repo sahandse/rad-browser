@@ -47,15 +47,10 @@ class SettingsPage extends ConsumerWidget {
           _SectionTitle(title: 'جستجو', theme: theme),
           _SettingCard(
             children: [
-              ListTile(
-                leading: const Icon(Icons.search_rounded),
-                title: const Text('موتور جستجو'),
-                subtitle: Text(settings.searchEngine.title),
-                onTap: () => _showSearchEnginePicker(
-                  context,
-                  ref,
-                  settings.searchEngine,
-                ),
+              const ListTile(
+                leading: Icon(Icons.auto_awesome_rounded),
+                title: Text('موتور جستجو'),
+                subtitle: Text('خودکار: Google با اینترنت جهانی، ذره‌بین در شبکه داخلی'),
               ),
               const Divider(height: 1),
               const SearchHistorySettingsTile(),
@@ -247,34 +242,6 @@ class SettingsPage extends ConsumerWidget {
     );
     if (result != null) {
       await ref.read(settingsProvider.notifier).setUiDensity(result);
-    }
-  }
-
-  Future<void> _showSearchEnginePicker(
-    BuildContext context,
-    WidgetRef ref,
-    RadSearchEngine selected,
-  ) async {
-    final result = await showModalBottomSheet<RadSearchEngine>(
-      context: context,
-      showDragHandle: true,
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: RadSearchEngine.values
-              .map(
-                (value) => _ChoiceTile(
-                  title: value.title,
-                  selected: value == selected,
-                  onTap: () => Navigator.pop(context, value),
-                ),
-              )
-              .toList(growable: false),
-        ),
-      ),
-    );
-    if (result != null) {
-      await ref.read(settingsProvider.notifier).setSearchEngine(result);
     }
   }
 
