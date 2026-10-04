@@ -11,6 +11,9 @@ import '../../../history/presentation/controllers/history_controller.dart';
 import '../../../history/presentation/pages/history_page.dart';
 import '../../../network/domain/network_mode.dart';
 import '../../../network/presentation/network_providers.dart';
+import '../../../settings/domain/app_settings.dart';
+import '../../../settings/presentation/controllers/settings_controller.dart';
+import '../../../settings/presentation/pages/settings_page.dart';
 import '../controllers/browser_tabs_controller.dart';
 import 'tabs_page.dart';
 
@@ -43,10 +46,16 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
   @override
   void initState() {
     super.initState();
-    _currentUri = UrlUtils.resolve(widget.initialInput);
+    _currentUri = _resolveInput(widget.initialInput);
     _addressController = TextEditingController(text: _currentUri.toString());
     _tabId = widget.existingTabId ??
         ref.read(browserTabsProvider.notifier).open(_currentUri);
+  }
+
+  Uri _resolveInput(String input) {
+    final value = input.trim();
+    if (UrlUtils.looksLikeUrl(value)) return UrlUtils.resolve(value);
+    return ref.read(settingsProvider).searchEngine.searchUri(value);
   }
 
   @override
@@ -69,7 +78,7 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
 
   Future<void> _navigate(String value) async {
     if (value.trim().isEmpty) return;
-    final uri = UrlUtils.resolve(value);
+    final uri = _resolveInput(value);
     FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
       _currentUri = uri;
@@ -488,6 +497,16 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
                 onTap: () {
                   Navigator.pop(sheetContext);
                   _openDownloads();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.settings_outlined),
+                title: const Text('تنظیمات'),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(builder: (_) => const SettingsPage()),
+                  );
                 },
               ),
               ListTile(
