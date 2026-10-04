@@ -3,6 +3,10 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/url_utils.dart';
+import '../../../bookmarks/presentation/controllers/bookmarks_controller.dart';
+import '../../../bookmarks/presentation/pages/bookmarks_page.dart';
+import '../../../history/presentation/controllers/history_controller.dart';
+import '../../../history/presentation/pages/history_page.dart';
 import '../controllers/browser_tabs_controller.dart';
 import 'tabs_page.dart';
 
@@ -29,6 +33,7 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
   bool _canGoBack = false;
   bool _canGoForward = false;
   bool _isLoading = true;
+  String _currentTitle = '';
 
   @override
   void initState() {
@@ -65,6 +70,7 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
       _currentUri = uri;
       _addressController.text = uri.toString();
       _isLoading = true;
+      _currentTitle = '';
     });
     ref.read(browserTabsProvider.notifier).update(
           _tabId,
@@ -234,6 +240,7 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
                     _currentUri = uri;
                     _addressController.text = uri.toString();
                     _isLoading = true;
+                    _currentTitle = '';
                   });
                   ref.read(browserTabsProvider.notifier).update(
                         _tabId,
@@ -253,9 +260,10 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
                 },
                 onTitleChanged: (controller, title) {
                   if (title == null || title.trim().isEmpty) return;
+                  _currentTitle = title.trim();
                   ref.read(browserTabsProvider.notifier).update(
                         _tabId,
-                        title: title.trim(),
+                        title: _currentTitle,
                       );
                 },
                 onLoadStop: (controller, url) async {
@@ -276,6 +284,13 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
                         isLoading: false,
                         progress: 1,
                       );
+                  if (uri != null) {
+                    final title = _currentTitle.isEmpty ? uri.host : _currentTitle;
+                    await ref.read(historyProvider.notifier).record(
+                          url: uri,
+                          title: title,
+                        );
+                  }
                   await _syncNavigationState();
                 },
                 onReceivedError: (controller, request, error) {
@@ -351,6 +366,7 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
 
   Future<void> _showBrowserMenu(BuildContext context) async {
     final scheme = Theme.of(context).colorScheme;
+    final isBookmarked = ref.read(bookmarksProvider.notifier).contains(_currentUri);
     await showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
@@ -361,6 +377,46 @@ class _BrowserPageState extends ConsumerState<BrowserPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              ListTile(
+                leading: Icon(
+                  isBookmarked ? Icons.star_rounded : Icons.star_border_rounded,
+                ),
+                title: Text(isBookmarked ? 'حذف از نشانک‌ها' : 'افزودن به نشانک‌ها'),
+                onTap: () async {
+                  final title = _currentTitle.isEmpty
+                      ? _currentUri.host
+                      : _currentTitle;
+                  await ref.read(bookmarksProvider.notifier).toggle(
+                        url: _currentUri,
+                        title: title,
+                      );
+                  if (sheetContext.mounted) Navigator.pop(sheetContext);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.star_outline_rounded),
+                title: const Text('نشانک‌ها'),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const BookmarksPage(),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.history_rounded),
+                title: const Text('تاریخچه'),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const HistoryPage(),
+                    ),
+                  );
+                },
+              ),
               ListTile(
                 leading: const Icon(Icons.add_box_outlined),
                 title: const Text('تب جدید'),
