@@ -6,6 +6,7 @@ import '../../../browser/presentation/controllers/browser_tabs_controller.dart';
 import '../../../browser/presentation/pages/browser_page.dart';
 import '../../../browser/presentation/pages/tabs_page.dart';
 import '../../../history/presentation/pages/history_page.dart';
+import '../../../iran_directory/presentation/pages/iran_directory_page.dart';
 import '../../../network/domain/network_mode.dart';
 import '../../../network/presentation/network_providers.dart';
 import '../widgets/network_status_chip.dart';
@@ -81,9 +82,20 @@ class HomePage extends ConsumerWidget {
                     onSubmitted: (value) => _openBrowser(context, value),
                   ),
                   const SizedBox(height: 28),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 12,
+                    runSpacing: 10,
                     children: [
+                      _HomeAction(
+                        icon: Icons.language_rounded,
+                        label: 'ایران وب',
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const IranDirectoryPage(),
+                          ),
+                        ),
+                      ),
                       _HomeAction(
                         icon: Icons.star_border_rounded,
                         label: 'نشانک‌ها',
@@ -93,7 +105,6 @@ class HomePage extends ConsumerWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 18),
                       _HomeAction(
                         icon: Icons.history_rounded,
                         label: 'تاریخچه',
@@ -174,6 +185,18 @@ class HomePage extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              ListTile(
+                leading: const Icon(Icons.language_rounded),
+                title: const Text('ایران وب'),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const IranDirectoryPage(),
+                    ),
+                  );
+                },
+              ),
               ListTile(
                 leading: const Icon(Icons.star_border_rounded),
                 title: const Text('نشانک‌ها'),
