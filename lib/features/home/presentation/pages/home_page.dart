@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/url_utils.dart';
+import '../../../../core/widgets/rad_brand_logo.dart';
 import '../../../bookmarks/presentation/pages/bookmarks_page.dart';
 import '../../../browser/presentation/controllers/browser_tabs_controller.dart';
 import '../../../browser/presentation/pages/browser_page.dart';
@@ -162,7 +163,7 @@ class HomePage extends ConsumerWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const _RadLogo(),
+                      const RadBrandLogo(),
                       const SizedBox(height: 38),
                       _GoogleLikeSearchBox(
                         hint: mode == NetworkMode.internalOnly
@@ -293,79 +294,6 @@ class HomePage extends ConsumerWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _RadLogo extends StatelessWidget {
-  const _RadLogo();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-
-    return Column(
-      children: [
-        Container(
-          width: 108,
-          height: 108,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(34),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                scheme.primary,
-                scheme.primary.withValues(alpha: .72),
-              ],
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: scheme.primary.withValues(alpha: .18),
-                blurRadius: 34,
-                offset: const Offset(0, 14),
-              ),
-            ],
-          ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              const Text(
-                'R',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 58,
-                  height: 1,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -3,
-                ),
-              ),
-              Positioned(
-                right: 20,
-                bottom: 18,
-                child: Container(
-                  width: 11,
-                  height: 11,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: .92),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 18),
-        Text(
-          'راد',
-          textDirection: TextDirection.rtl,
-          style: theme.textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.w800,
-            letterSpacing: -.8,
-          ),
-        ),
-      ],
     );
   }
 }
