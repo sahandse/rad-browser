@@ -39,14 +39,14 @@ class RadBackupService {
   }
 
   Future<RadBackupImportResult?> importBackup() async {
-    final picked = await FilePicker.platform.pickFiles(
+    final picked = await FilePicker.pickFile(
       type: FileType.custom,
       allowedExtensions: const ['json'],
-      withData: true,
     );
-    if (picked == null || picked.files.isEmpty) return null;
-    final bytes = picked.files.single.bytes;
-    if (bytes == null || bytes.isEmpty) {
+    if (picked == null) return null;
+
+    final bytes = await picked.readAsBytes();
+    if (bytes.isEmpty) {
       throw const FormatException('فایل انتخاب‌شده قابل خواندن نیست.');
     }
 
