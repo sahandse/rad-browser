@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:persian_fonts/persian_fonts.dart';
 
 class RadColors {
   const RadColors._();
@@ -54,6 +55,10 @@ class RadTheme {
     required bool dark,
   }) {
     final focusColor = dark ? const Color(0xFF8AB4F8) : RadColors.primary;
+    final vazirTextTheme = PersianFonts.vazirTextTheme.apply(
+      bodyColor: scheme.onSurface,
+      displayColor: scheme.onSurface,
+    );
 
     return ThemeData(
       useMaterial3: true,
@@ -61,13 +66,15 @@ class RadTheme {
       scaffoldBackgroundColor: scaffold,
       visualDensity: compact ? VisualDensity.compact : VisualDensity.standard,
       splashFactory: InkSparkle.splashFactory,
+      textTheme: vazirTextTheme,
+      primaryTextTheme: vazirTextTheme,
       appBarTheme: AppBarTheme(
         elevation: 0,
         scrolledUnderElevation: 0,
         backgroundColor: Colors.transparent,
         foregroundColor: scheme.onSurface,
         centerTitle: false,
-        titleTextStyle: TextStyle(
+        titleTextStyle: PersianFonts.Vazir.copyWith(
           color: scheme.onSurface,
           fontSize: 20,
           fontWeight: FontWeight.w700,
@@ -115,7 +122,9 @@ class RadTheme {
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         backgroundColor: scheme.inverseSurface,
-        contentTextStyle: TextStyle(color: scheme.onInverseSurface),
+        contentTextStyle: PersianFonts.Vazir.copyWith(
+          color: scheme.onInverseSurface,
+        ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       ),
       dividerTheme: DividerThemeData(
@@ -130,12 +139,14 @@ class RadTheme {
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
+          textStyle: PersianFonts.Vazir,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
+          textStyle: PersianFonts.Vazir,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
         ),
