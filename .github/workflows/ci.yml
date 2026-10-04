@@ -27,6 +27,9 @@ jobs:
           fi
           rm -f test/widget_test.dart
 
+      - name: Configure Android package and permissions
+        run: python3 tool/configure_android.py
+
       - name: Install dependencies
         run: flutter pub get
 
@@ -43,6 +46,17 @@ jobs:
 
       - name: Build Android APK
         run: flutter build apk --debug
+
+      - name: Audit Android manifest
+        run: |
+          unzip -p build/app/outputs/flutter-apk/app-debug.apk AndroidManifest.xml > /tmp/rad-manifest.bin
+          strings -el /tmp/rad-manifest.bin > /tmp/rad-manifest.txt
+          grep -q 'com.sahand.rad' /tmp/rad-manifest.txt
+          if grep -Eq 'android.permission.(READ_EXTERNAL_STORAGE|WRITE_EXTERNAL_STORAGE|REQUEST_INSTALL_PACKAGES)' /tmp/rad-manifest.txt; then
+            echo 'Forbidden Android permission found in merged manifest.'
+            grep -E 'android.permission.(READ_EXTERNAL_STORAGE|WRITE_EXTERNAL_STORAGE|REQUEST_INSTALL_PACKAGES)' /tmp/rad-manifest.txt
+            exit 1
+          fi
 
       - name: Build Web release
         run: flutter build web --release
