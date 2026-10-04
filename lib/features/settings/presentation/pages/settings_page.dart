@@ -57,6 +57,49 @@ class SettingsPage extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 22),
+          _SectionTitle(title: 'حریم خصوصی و امنیت', theme: theme),
+          _SettingCard(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.shield_outlined),
+                title: const Text('محافظت در برابر رهگیری'),
+                subtitle: Text(settings.trackingProtection.title),
+                onTap: () => _showTrackingPicker(
+                  context,
+                  ref,
+                  settings.trackingProtection,
+                ),
+              ),
+              const Divider(height: 1),
+              SwitchListTile.adaptive(
+                secondary: const Icon(Icons.https_rounded),
+                title: const Text('HTTPS-first'),
+                subtitle: const Text('برای آدرس‌های HTTP ابتدا نسخه امن HTTPS امتحان شود.'),
+                value: settings.httpsFirst,
+                onChanged: (value) =>
+                    ref.read(settingsProvider.notifier).setHttpsFirst(value),
+              ),
+              const Divider(height: 1),
+              SwitchListTile.adaptive(
+                secondary: const Icon(Icons.open_in_new_off_rounded),
+                title: const Text('مسدود کردن Pop-up'),
+                subtitle: const Text('پنجره‌های ناخواسته و بازشدن خودکار تب‌ها محدود می‌شوند.'),
+                value: settings.blockPopups,
+                onChanged: (value) =>
+                    ref.read(settingsProvider.notifier).setBlockPopups(value),
+              ),
+              const Divider(height: 1),
+              SwitchListTile.adaptive(
+                secondary: const Icon(Icons.data_saver_on_rounded),
+                title: const Text('کاهش مصرف داده'),
+                subtitle: const Text('پخش خودکار و بارگذاری‌های سنگین غیرضروری محدود می‌شوند.'),
+                value: settings.dataSaver,
+                onChanged: (value) =>
+                    ref.read(settingsProvider.notifier).setDataSaver(value),
+              ),
+            ],
+          ),
+          const SizedBox(height: 22),
           _SectionTitle(title: 'داده‌های مرور', theme: theme),
           _SettingCard(
             children: [
@@ -192,6 +235,35 @@ class SettingsPage extends ConsumerWidget {
     );
     if (result != null) {
       await ref.read(settingsProvider.notifier).setSearchEngine(result);
+    }
+  }
+
+  Future<void> _showTrackingPicker(
+    BuildContext context,
+    WidgetRef ref,
+    RadTrackingProtection selected,
+  ) async {
+    final result = await showModalBottomSheet<RadTrackingProtection>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: RadTrackingProtection.values
+              .map(
+                (value) => _ChoiceTile(
+                  title: value.title,
+                  subtitle: value.description,
+                  selected: value == selected,
+                  onTap: () => Navigator.pop(context, value),
+                ),
+              )
+              .toList(growable: false),
+        ),
+      ),
+    );
+    if (result != null) {
+      await ref.read(settingsProvider.notifier).setTrackingProtection(result);
     }
   }
 
