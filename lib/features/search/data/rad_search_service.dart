@@ -75,6 +75,7 @@ class RadSearchService {
   Future<RadSearchResponse> search({
     required String query,
     required RadSearchEngine engine,
+    int page = 0,
   }) async {
     final clean = query.trim();
     if (clean.isEmpty) {
@@ -107,7 +108,7 @@ class RadSearchService {
     Object? lastError;
     for (final candidate in order) {
       try {
-        final results = await _searchWith(candidate, clean)
+        final results = await _searchWith(candidate, clean, page)
             .timeout(const Duration(seconds: 12));
         if (results.isNotEmpty) {
           return RadSearchResponse(
@@ -168,20 +169,22 @@ class RadSearchService {
   Future<List<RadSearchItem>> _searchWith(
     RadSearchEngine engine,
     String query,
+    int page,
   ) async {
     return switch (engine) {
-      RadSearchEngine.google => _google(query),
-      RadSearchEngine.zarebin => _zarebin(query),
+      RadSearchEngine.google => _google(query, page),
+      RadSearchEngine.zarebin => _internalSearch(query, page),
       RadSearchEngine.bing => _bing(query),
       RadSearchEngine.duckDuckGo => _duckDuckGo(query),
     };
   }
 
-  Future<List<RadSearchItem>> _google(String query) async {
+  Future<List<RadSearchItem>> _google(String query, int page) async {
     final uri = Uri.https('www.google.com', '/search', {
       'q': query,
       'hl': 'fa',
-      'num': '50',
+      'num': '20',
+      'start': '${page * 20}',
       'filter': '0',
     });
     final response = await _client.get(uri, headers: _headers);
@@ -200,7 +203,7 @@ class RadSearchService {
       final snippet = _snippet(container, title);
       seen.add(url);
       results.add(RadSearchItem(title: title, url: url, snippet: snippet));
-      if (results.length >= 50) break;
+      if (results.length >= 20) break;
     }
     return results;
   }
@@ -337,9 +340,11 @@ class RadSearchService {
     return results;
   }
 
-  Future<List<RadSearchItem>> _zarebin(String query) async {
+  Future<List<RadSearchItem>> _internalSearch(String query, int page) async {
     for (final key in const ['q', 'query', 'search']) {
-      final uri = Uri.https('zarebin.ir', '/', {key: query});
+      final params = <String, String>{key: query};
+      if (page > 0) params['page'] = '${page + 1}';
+      final uri = Uri.https('zarebin.ir', '/', params);
       final response = await _client.get(uri, headers: _headers);
       if (response.statusCode < 200 || response.statusCode >= 400) continue;
       final doc = html_parser.parse(response.body);

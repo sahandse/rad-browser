@@ -22,8 +22,6 @@ class NetworkProbeService {
         globalProbes = globalProbes ??
             [
               Uri.https('www.google.com', '/generate_204'),
-              Uri.https('www.cloudflare.com', '/cdn-cgi/trace'),
-              Uri.https('www.bing.com'),
             ];
 
   final Connectivity _connectivity;

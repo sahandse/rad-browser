@@ -389,10 +389,10 @@ class _MinimalNetworkStatus extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final (label, icon) = switch (mode) {
-      NetworkMode.fullInternet => ('آنلاین', Icons.circle),
-      NetworkMode.internalOnly => ('شبکه داخلی', Icons.public_rounded),
+      NetworkMode.fullInternet => ('اینترنت بین‌الملل', Icons.public_rounded),
+      NetworkMode.internalOnly => ('اینترنت داخلی', Icons.hub_rounded),
       NetworkMode.offline => ('آفلاین', Icons.cloud_off_rounded),
-      null => ('بررسی شبکه', Icons.more_horiz_rounded),
+      null => ('در حال بررسی اینترنت', Icons.more_horiz_rounded),
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),

@@ -47,7 +47,10 @@ class _RadSearchResultsPageState extends State<RadSearchResultsPage> {
   RadSearchEngine? _usedEngine;
   _SearchSection _section = _SearchSection.all;
   int _generation = 0;
-  int _visibleResults = 15;
+  int _visibleResults = 20;
+  int _page = 0;
+  bool _loadingMore = false;
+  bool _hasMore = true;
 
   @override
   void initState() {
@@ -79,9 +82,40 @@ class _RadSearchResultsPageState extends State<RadSearchResultsPage> {
 
   void _onScroll() {
     if (!_scrollController.hasClients || _section != _SearchSection.all) return;
-    if (_scrollController.position.extentAfter > 420) return;
-    if (_visibleResults >= _results.length) return;
-    setState(() => _visibleResults = (_visibleResults + 10).clamp(0, _results.length));
+    if (_scrollController.position.extentAfter > 520) return;
+    if (_visibleResults < _results.length) {
+      setState(() => _visibleResults = (_visibleResults + 10).clamp(0, _results.length));
+      return;
+    }
+    if (_hasMore && !_loadingMore) _loadMore();
+  }
+
+  Future<void> _loadMore() async {
+    if (_loadingMore || !_hasMore || _query.isEmpty) return;
+    final generation = _generation;
+    setState(() => _loadingMore = true);
+    try {
+      final nextPage = _page + 1;
+      final response = await _service.search(
+        query: _query,
+        engine: widget.engine,
+        page: nextPage,
+      );
+      if (!mounted || generation != _generation) return;
+      final existing = _results.map((e) => e.url).toSet();
+      final incoming = response.results.where((e) => !existing.contains(e.url)).toList();
+      setState(() {
+        _page = nextPage;
+        _results = [..._results, ...incoming];
+        _visibleResults = _results.length;
+        _hasMore = incoming.isNotEmpty;
+        _loadingMore = false;
+      });
+    } catch (_) {
+      if (mounted && generation == _generation) {
+        setState(() => _loadingMore = false);
+      }
+    }
   }
 
   Future<void> _updateSuggestions(String value) async {
@@ -121,7 +155,10 @@ class _RadSearchResultsPageState extends State<RadSearchResultsPage> {
       _knowledge = null;
       _answer = _smartService.answerBox(value);
       _usedEngine = null;
-      _visibleResults = 15;
+      _visibleResults = 20;
+      _page = 0;
+      _hasMore = true;
+      _loadingMore = false;
       _section = _SearchSection.all;
       _showSuggestions = false;
     });
@@ -129,7 +166,7 @@ class _RadSearchResultsPageState extends State<RadSearchResultsPage> {
     await _smartService.rememberSearch(value);
 
     try {
-      final response = await _service.search(query: value, engine: widget.engine);
+      final response = await _service.search(query: value, engine: widget.engine, page: 0);
       if (!mounted || generation != _generation) return;
       final ranked = _smartService.rankResults(value, response.results);
       setState(() {
@@ -196,8 +233,6 @@ class _RadSearchResultsPageState extends State<RadSearchResultsPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final usedEngine = _usedEngine;
-    final usedFallback = usedEngine != null && usedEngine != widget.engine;
 
     return Scaffold(
       appBar: AppBar(
@@ -242,14 +277,7 @@ class _RadSearchResultsPageState extends State<RadSearchResultsPage> {
                 onChanged: (value) => setState(() => _section = value),
                 onIranWeb: _openIranWeb,
               ),
-              if (usedFallback)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 6),
-                  child: Row(
-                    children: [
-                      Icon(Icons.swap_horiz_rounded, size: 16, color: scheme.primary),
-                      const SizedBox(width: 6),
-                      Expanded(
+              Expanded(
                         child: Text(
                           'نتایج با ${usedEngine.title} تکمیل شدند',
                           textDirection: TextDirection.rtl,
