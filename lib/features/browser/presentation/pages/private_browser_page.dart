@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/url_utils.dart';
 import '../../../privacy/domain/tracker_blocker.dart';
+import '../../../settings/domain/app_settings.dart';
 import '../../../settings/presentation/controllers/settings_controller.dart';
 
 class PrivateBrowserPage extends ConsumerStatefulWidget {
@@ -162,7 +163,6 @@ class _PrivateBrowserPageState extends ConsumerState<PrivateBrowserPage> {
                   javaScriptEnabled: true,
                   incognito: true,
                   cacheEnabled: false,
-                  clearCache: true,
                   thirdPartyCookiesEnabled: false,
                   supportMultipleWindows: false,
                   javaScriptCanOpenWindowsAutomatically: !settings.blockPopups,
