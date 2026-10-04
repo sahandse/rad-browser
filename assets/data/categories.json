@@ -1,4 +1,20 @@
 {
-  "version": 1,
-  "categories": []
+  "version": 2,
+  "categories": [
+    {"id":"search","title":"جستجو","icon":"search","order":1},
+    {"id":"government","title":"دولت و خدمات عمومی","icon":"account_balance","order":2},
+    {"id":"banking","title":"بانک و پرداخت","icon":"account_balance_wallet","order":3},
+    {"id":"shopping","title":"فروشگاه و خرید","icon":"shopping_bag","order":4},
+    {"id":"news","title":"خبر و رسانه","icon":"newspaper","order":5},
+    {"id":"education","title":"آموزش و دانشگاه","icon":"school","order":6},
+    {"id":"transport","title":"حمل‌ونقل و سفر","icon":"directions_car","order":7},
+    {"id":"map","title":"نقشه و مسیریابی","icon":"map","order":8},
+    {"id":"weather","title":"هواشناسی","icon":"cloud","order":9},
+    {"id":"health","title":"سلامت و درمان","icon":"health_and_safety","order":10},
+    {"id":"video","title":"ویدیو و سرگرمی","icon":"play_circle","order":11},
+    {"id":"communication","title":"پیام‌رسان و ارتباطات","icon":"forum","order":12},
+    {"id":"operator","title":"اپراتورها و اینترنت","icon":"cell_tower","order":13},
+    {"id":"technology","title":"فناوری و خدمات آنلاین","icon":"devices","order":14},
+    {"id":"other","title":"سایر خدمات","icon":"apps","order":99}
+  ]
 }
