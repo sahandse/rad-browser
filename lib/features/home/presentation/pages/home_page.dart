@@ -30,6 +30,7 @@ class HomePage extends ConsumerWidget {
     if (value.startsWith('!')) {
       final handled = await _handleBang(context, ref, value);
       if (handled) return;
+      if (!context.mounted) return;
     }
 
     final mode = ref.read(networkModeProvider).valueOrNull;
