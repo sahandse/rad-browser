@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../bookmarks/presentation/pages/bookmarks_page.dart';
+import '../../../browser/presentation/controllers/browser_tabs_controller.dart';
 import '../../../browser/presentation/pages/browser_page.dart';
+import '../../../browser/presentation/pages/tabs_page.dart';
+import '../../../history/presentation/pages/history_page.dart';
 import '../../../network/domain/network_mode.dart';
 import '../../../network/presentation/network_providers.dart';
 import '../widgets/network_status_chip.dart';
@@ -9,15 +13,6 @@ import '../widgets/rad_search_bar.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
-
-  static const _shortcuts = <({IconData icon, String label})>[
-    (icon: Icons.language_rounded, label: 'ایران وب'),
-    (icon: Icons.account_balance_outlined, label: 'بانک‌ها'),
-    (icon: Icons.apartment_outlined, label: 'دولت'),
-    (icon: Icons.newspaper_outlined, label: 'خبر'),
-    (icon: Icons.shopping_bag_outlined, label: 'خرید'),
-    (icon: Icons.school_outlined, label: 'آموزش'),
-  ];
 
   void _openBrowser(BuildContext context, String input) {
     if (input.trim().isEmpty) return;
@@ -33,6 +28,7 @@ class HomePage extends ConsumerWidget {
     final network = ref.watch(networkModeProvider);
     final mode = network.valueOrNull;
     final internalOnly = mode == NetworkMode.internalOnly;
+    final tabCount = ref.watch(browserTabsProvider).length;
 
     return Scaffold(
       backgroundColor: scheme.surface,
@@ -49,7 +45,7 @@ class HomePage extends ConsumerWidget {
                     children: [
                       IconButton(
                         tooltip: 'منو',
-                        onPressed: () {},
+                        onPressed: () => _showHomeMenu(context),
                         icon: const Icon(Icons.more_horiz_rounded),
                       ),
                       const Spacer(),
@@ -61,9 +57,11 @@ class HomePage extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  SizedBox(height: MediaQuery.sizeOf(context).height < 700 ? 34 : 62),
+                  SizedBox(
+                    height: MediaQuery.sizeOf(context).height < 700 ? 52 : 82,
+                  ),
                   _RadMark(theme: theme),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 34),
                   AnimatedSwitcher(
                     duration: const Duration(milliseconds: 240),
                     child: internalOnly
@@ -82,33 +80,30 @@ class HomePage extends ConsumerWidget {
                   RadSearchBar(
                     onSubmitted: (value) => _openBrowser(context, value),
                   ),
-                  const SizedBox(height: 30),
-                  Wrap(
-                    alignment: WrapAlignment.center,
-                    spacing: 14,
-                    runSpacing: 18,
-                    children: _shortcuts
-                        .map(
-                          (item) => _Shortcut(
-                            icon: item.icon,
-                            label: item.label,
-                            onTap: () {},
+                  const SizedBox(height: 28),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _HomeAction(
+                        icon: Icons.star_border_rounded,
+                        label: 'نشانک‌ها',
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const BookmarksPage(),
                           ),
-                        )
-                        .toList(),
-                  ),
-                  const SizedBox(height: 40),
-                  Divider(color: scheme.outlineVariant.withValues(alpha: .5), height: 1),
-                  const SizedBox(height: 18),
-                  Text(
-                    internalOnly
-                        ? 'جستجو و باز کردن سایت‌های در دسترس ایران ادامه دارد.'
-                        : 'راد برای وب سریع، خلوت و قابل‌اعتماد طراحی شده است.',
-                    textAlign: TextAlign.center,
-                    textDirection: TextDirection.rtl,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
+                        ),
+                      ),
+                      const SizedBox(width: 18),
+                      _HomeAction(
+                        icon: Icons.history_rounded,
+                        label: 'تاریخچه',
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const HistoryPage(),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -124,22 +119,91 @@ class HomePage extends ConsumerWidget {
           decoration: BoxDecoration(
             color: scheme.surfaceContainerLow,
             borderRadius: BorderRadius.circular(26),
-            border: Border.all(color: scheme.outlineVariant.withValues(alpha: .45)),
+            border: Border.all(
+              color: scheme.outlineVariant.withValues(alpha: .45),
+            ),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              IconButton(onPressed: null, icon: const Icon(Icons.arrow_back_rounded)),
-              IconButton(onPressed: null, icon: const Icon(Icons.arrow_forward_rounded)),
-              IconButton(onPressed: () {}, icon: const Icon(Icons.home_rounded)),
+              const IconButton(
+                tooltip: 'عقب',
+                onPressed: null,
+                icon: Icon(Icons.arrow_back_rounded),
+              ),
+              const IconButton(
+                tooltip: 'جلو',
+                onPressed: null,
+                icon: Icon(Icons.arrow_forward_rounded),
+              ),
+              IconButton(
+                tooltip: 'خانه',
+                onPressed: () {},
+                icon: const Icon(Icons.home_rounded),
+              ),
               Badge(
-                label: const Text('1'),
+                isLabelVisible: tabCount > 0,
+                label: Text('$tabCount'),
                 child: IconButton(
-                  onPressed: () {},
+                  tooltip: 'تب‌ها',
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(builder: (_) => const TabsPage()),
+                  ),
                   icon: const Icon(Icons.crop_square_rounded),
                 ),
               ),
-              IconButton(onPressed: () {}, icon: const Icon(Icons.menu_rounded)),
+              IconButton(
+                tooltip: 'منو',
+                onPressed: () => _showHomeMenu(context),
+                icon: const Icon(Icons.menu_rounded),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showHomeMenu(BuildContext context) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.star_border_rounded),
+                title: const Text('نشانک‌ها'),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(builder: (_) => const BookmarksPage()),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.history_rounded),
+                title: const Text('تاریخچه'),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(builder: (_) => const HistoryPage()),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.crop_square_rounded),
+                title: const Text('تب‌ها'),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(builder: (_) => const TabsPage()),
+                  );
+                },
+              ),
             ],
           ),
         ),
@@ -167,7 +231,10 @@ class _NetworkCheckingChip extends StatelessWidget {
           SizedBox(
             width: 12,
             height: 12,
-            child: CircularProgressIndicator(strokeWidth: 1.7, color: scheme.primary),
+            child: CircularProgressIndicator(
+              strokeWidth: 1.7,
+              color: scheme.primary,
+            ),
           ),
           const SizedBox(width: 8),
           const Text('بررسی شبکه', textDirection: TextDirection.rtl),
@@ -231,8 +298,12 @@ class _RadMark extends StatelessWidget {
   }
 }
 
-class _Shortcut extends StatelessWidget {
-  const _Shortcut({required this.icon, required this.label, required this.onTap});
+class _HomeAction extends StatelessWidget {
+  const _HomeAction({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
 
   final IconData icon;
   final String label;
@@ -240,37 +311,26 @@ class _Shortcut extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    return SizedBox(
-      width: 76,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(22),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 7),
-          child: Column(
-            children: [
-              Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: scheme.surfaceContainerHighest.withValues(alpha: .58),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: scheme.outlineVariant.withValues(alpha: .28)),
-                ),
-                child: Icon(icon, size: 21, color: scheme.onSurface),
+    final scheme = Theme.of(context).colorScheme;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(22),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        child: Column(
+          children: [
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                color: scheme.surfaceContainerHighest.withValues(alpha: .58),
+                shape: BoxShape.circle,
               ),
-              const SizedBox(height: 9),
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textDirection: TextDirection.rtl,
-                style: theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w500),
-              ),
-            ],
-          ),
+              child: Icon(icon, size: 21),
+            ),
+            const SizedBox(height: 8),
+            Text(label, textDirection: TextDirection.rtl),
+          ],
         ),
       ),
     );
