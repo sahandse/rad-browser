@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/rad_theme.dart';
 import '../../../search/domain/search_suggestion.dart';
 import '../../../search/presentation/search_providers.dart';
 
@@ -20,7 +19,18 @@ class _RadSearchBarState extends ConsumerState<RadSearchBar> {
   String _query = '';
 
   @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(_onFocusChanged);
+  }
+
+  void _onFocusChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
   void dispose() {
+    _focusNode.removeListener(_onFocusChanged);
     _controller.dispose();
     _focusNode.dispose();
     super.dispose();
@@ -36,51 +46,74 @@ class _RadSearchBarState extends ConsumerState<RadSearchBar> {
   @override
   Widget build(BuildContext context) {
     final suggestions = ref.watch(searchSuggestionsProvider(_query));
-    final scheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final showSuggestions = _focusNode.hasFocus && suggestions.isNotEmpty;
 
     return Column(
       children: [
-        TextField(
-          controller: _controller,
-          focusNode: _focusNode,
-          textInputAction: TextInputAction.go,
-          onSubmitted: _submit,
-          onChanged: (value) => setState(() => _query = value),
-          onTap: () => setState(() {}),
-          textDirection: TextDirection.rtl,
-          decoration: InputDecoration(
-            hintText: 'جستجو یا وارد کردن آدرس',
-            hintTextDirection: TextDirection.rtl,
-            prefixIcon: const Icon(Icons.search_rounded),
-            suffixIcon: _query.isEmpty
-                ? null
-                : IconButton(
-                    tooltip: 'پاک کردن',
-                    onPressed: () {
-                      _controller.clear();
-                      setState(() => _query = '');
-                      _focusNode.requestFocus();
-                    },
-                    icon: const Icon(Icons.close_rounded),
-                  ),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 18, vertical: 17),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: .045),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
           ),
-          style: const TextStyle(fontSize: 16, color: RadColors.text),
+          child: TextField(
+            controller: _controller,
+            focusNode: _focusNode,
+            textInputAction: TextInputAction.go,
+            onSubmitted: _submit,
+            onChanged: (value) => setState(() => _query = value),
+            textDirection: TextDirection.rtl,
+            cursorColor: scheme.primary,
+            decoration: InputDecoration(
+              hintText: 'جستجو یا وارد کردن آدرس',
+              hintTextDirection: TextDirection.rtl,
+              prefixIcon: const Icon(Icons.search_rounded),
+              suffixIcon: _query.isEmpty
+                  ? null
+                  : IconButton(
+                      tooltip: 'پاک کردن',
+                      onPressed: () {
+                        _controller.clear();
+                        setState(() => _query = '');
+                        _focusNode.requestFocus();
+                      },
+                      icon: const Icon(Icons.close_rounded),
+                    ),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 18, vertical: 17),
+            ),
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: scheme.onSurface,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
         ),
         AnimatedSwitcher(
-          duration: const Duration(milliseconds: 160),
+          duration: const Duration(milliseconds: 180),
           child: showSuggestions
               ? Container(
                   key: const ValueKey('suggestions'),
-                  margin: const EdgeInsets.only(top: 8),
+                  margin: const EdgeInsets.only(top: 10),
                   decoration: BoxDecoration(
                     color: scheme.surfaceContainerLow,
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(22),
                     border: Border.all(
                       color: scheme.outlineVariant.withValues(alpha: .45),
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: .04),
+                        blurRadius: 18,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
                   ),
                   clipBehavior: Clip.antiAlias,
                   child: Column(
